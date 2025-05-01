@@ -2,19 +2,6 @@
   "version": 3,
   "targets": {
     "net9.0": {
-      "LiteNetLib/0.8.3.1": {
-        "type": "package",
-        "compile": {
-          "lib/netcoreapp2.0/LiteNetLib.dll": {
-            "related": ".deps.json;.pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/netcoreapp2.0/LiteNetLib.dll": {
-            "related": ".deps.json;.pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Extensions.DependencyInjection.Abstractions/9.0.4": {
         "type": "package",
         "compile": {
@@ -34,29 +21,6 @@
     }
   },
   "libraries": {
-    "LiteNetLib/0.8.3.1": {
-      "sha512": "BicXYfayys6PsJiG96Re/PNPoExqL4FagBcYrVkOuTn7GavP4Z9sn4BTLKSe8vlv6lk8D79KHa12xKiY+T7yjQ==",
-      "type": "package",
-      "path": "litenetlib/0.8.3.1",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.txt",
-        "lib/net35/LiteNetLib.dll",
-        "lib/net35/LiteNetLib.pdb",
-        "lib/net35/LiteNetLib.xml",
-        "lib/netcoreapp2.0/LiteNetLib.deps.json",
-        "lib/netcoreapp2.0/LiteNetLib.dll",
-        "lib/netcoreapp2.0/LiteNetLib.pdb",
-        "lib/netcoreapp2.0/LiteNetLib.xml",
-        "lib/netstandard2.0/LiteNetLib.deps.json",
-        "lib/netstandard2.0/LiteNetLib.dll",
-        "lib/netstandard2.0/LiteNetLib.pdb",
-        "lib/netstandard2.0/LiteNetLib.xml",
-        "litenetlib.0.8.3.1.nupkg.sha512",
-        "litenetlib.nuspec"
-      ]
-    },
     "Microsoft.Extensions.DependencyInjection.Abstractions/9.0.4": {
       "sha512": "UI0TQPVkS78bFdjkTodmkH0Fe8lXv9LnhGFKgKrsgUJ5a5FVdFRcgjIkBVLbGgdRhxWirxH/8IXUtEyYJx6GQg==",
       "type": "package",
@@ -90,7 +54,6 @@
   },
   "projectFileDependencyGroups": {
     "net9.0": [
-      "LiteNetLib >= 0.8.3.1",
       "Microsoft.Extensions.DependencyInjection.Abstractions >= 9.0.4"
     ]
   },
@@ -138,10 +101,6 @@
       "net9.0": {
         "targetAlias": "net9.0",
         "dependencies": {
-          "LiteNetLib": {
-            "target": "Package",
-            "version": "[0.8.3.1, )"
-          },
           "Microsoft.Extensions.DependencyInjection.Abstractions": {
             "target": "Package",
             "version": "[9.0.4, )"

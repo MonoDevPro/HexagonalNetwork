@@ -1,10 +1,9 @@
 {
   "version": 2,
-  "dgSpecHash": "qDsWuQqsYp8=",
+  "dgSpecHash": "688eXWPy6l0=",
   "success": true,
   "projectFilePath": "/home/filipe/Desenvolvimento/NetworkHexagonal/NetworkHexagonal/NetworkHexagonal.csproj",
   "expectedPackageFiles": [
-    "/home/filipe/.nuget/packages/litenetlib/0.8.3.1/litenetlib.0.8.3.1.nupkg.sha512",
     "/home/filipe/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/9.0.4/microsoft.extensions.dependencyinjection.abstractions.9.0.4.nupkg.sha512"
   ],
   "logs": []
