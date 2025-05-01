@@ -1,0 +1,12 @@
+/home/filipe/Desenvolvimento/NetworkHexagonal/NetworkHexagonal/bin/Debug/net6.0/NetworkHexagonal.deps.json
+/home/filipe/Desenvolvimento/NetworkHexagonal/NetworkHexagonal/bin/Debug/net6.0/NetworkHexagonal.dll
+/home/filipe/Desenvolvimento/NetworkHexagonal/NetworkHexagonal/bin/Debug/net6.0/NetworkHexagonal.pdb
+/home/filipe/Desenvolvimento/NetworkHexagonal/NetworkHexagonal/obj/Debug/net6.0/NetworkHexagonal.csproj.AssemblyReference.cache
+/home/filipe/Desenvolvimento/NetworkHexagonal/NetworkHexagonal/obj/Debug/net6.0/NetworkHexagonal.GeneratedMSBuildEditorConfig.editorconfig
+/home/filipe/Desenvolvimento/NetworkHexagonal/NetworkHexagonal/obj/Debug/net6.0/NetworkHexagonal.AssemblyInfoInputs.cache
+/home/filipe/Desenvolvimento/NetworkHexagonal/NetworkHexagonal/obj/Debug/net6.0/NetworkHexagonal.AssemblyInfo.cs
+/home/filipe/Desenvolvimento/NetworkHexagonal/NetworkHexagonal/obj/Debug/net6.0/NetworkHexagonal.csproj.CoreCompileInputs.cache
+/home/filipe/Desenvolvimento/NetworkHexagonal/NetworkHexagonal/obj/Debug/net6.0/NetworkHexagonal.dll
+/home/filipe/Desenvolvimento/NetworkHexagonal/NetworkHexagonal/obj/Debug/net6.0/refint/NetworkHexagonal.dll
+/home/filipe/Desenvolvimento/NetworkHexagonal/NetworkHexagonal/obj/Debug/net6.0/NetworkHexagonal.pdb
+/home/filipe/Desenvolvimento/NetworkHexagonal/NetworkHexagonal/obj/Debug/net6.0/ref/NetworkHexagonal.dll
