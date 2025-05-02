@@ -1,7 +1,8 @@
 namespace NetworkHexagonal.Core.Application.Ports
 {
-    public interface IPacket : INetworkSerializable
+    public interface IPacket
     {
-        // Interface base para todos os pacotes de rede
+        void Serialize(INetworkWriter writer);
+        void Deserialize(INetworkReader reader);
     }
 }

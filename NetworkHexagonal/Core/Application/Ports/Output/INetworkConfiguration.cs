@@ -8,5 +8,6 @@ namespace NetworkHexagonal.Core.Application.Ports.Output
         TimeSpan UpdateInterval { get; }
         TimeSpan PingInterval { get; }
         TimeSpan DisconnectTimeout { get; }
+        bool UnsyncedEvents { get; }
     }
 }

@@ -2,24 +2,24 @@ namespace NetworkHexagonal.Core.Application.Ports
 {
     public interface INetworkWriter
     {
-        void WriteInt(int value);
-        void WriteLong(long value);
-        void WriteShort(short value);
-        void WriteUShort(ushort value);
-        void WriteUInt(uint value);
-        void WriteULong(ulong value);
-        void WriteFloat(float value);
-        void WriteDouble(double value);
-        void WriteDecimal(decimal value);
-        void WriteChar(char value);
-        void WriteBool(bool value);
-        void WriteString(string value);
-        void WriteBytes(byte[] data);
-        void WriteIntArray(int[] values);
-        void WriteFloatArray(float[] values);
-        void WriteLongArray(long[] values);
-        void WriteDoubleArray(double[] values);
-        void WriteStringArray(string[] values);
+        public void Write<T>(T obj) where T : INetworkSerializable;
+        void Write(int value);
+        void Write(long value);
+        void Write(short value);
+        void Write(ushort value);
+        void Write(uint value);
+        void Write(ulong value);
+        void Write(float value);
+        void Write(double value);
+        void Write(char value);
+        void Write(bool value);
+        void Write(string value);
+        void WriteArray(byte[] data);
+        void WriteArray(int[] values);
+        void WriteArray(float[] values);
+        void WriteArray(long[] values);
+        void WriteArray(double[] values);
+        void WriteArray(string[] values);
         // Adicione outros métodos conforme necessidade
     }
 }

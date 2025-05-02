@@ -1,44 +1,85 @@
-# Estrutura do Projeto
+# Estrutura do Projeto Hexagonal Network
 
-Este documento mapeia a organização de pastas e componentes para facilitar tanto desenvolvedores humanos quanto agentes (Copilot, CI, etc.) a entenderem onde cada peça deve ser implementada.
-
+```
+NetworkHexagonal.sln
+README.md
+External/
+    LiteNetLib/   # Submódulo Git: https://github.com/MonoDevPro/LiteNetLib
+Infrastructure/
+    DependencyInjection/
+        ServiceCollectionExtensions.cs
 NetworkHexagonal/
-├── Core/                       # Núcleo da aplicação (Domínio + Ports)
-│   ├── Domain/                 # Lógica de negócio pura
-│   │   ├── Entities/           # Entidades do domínio (ex: Packet, Peer, etc.)
-│   │   ├── ValueObjects/       # Objetos-valor (ex: NetworkAddress, PeerId)
-│   │   └── Exceptions/         # Exceções de domínio personalizadas
-│   │
-│   └── Application/            # Casos de uso / Interactors
-│       ├── Ports/              # Interfaces (Input & Output Ports)
-│       │   ├── Input/          # Input Ports: comandos e queries do Core
-│       │   └── Output/         # Output Ports: serviços que o Core usa
-│       └── Services/           # Implementações dos casos de uso
-│
-├── Adapters/                   # Implementações de Ports (Infraestrutura)
-│   ├── Outbound/               # Driven Adapters (Core → externo)
-│   │   ├── Networking/         # LiteNetLibAdapter
-│   │   │   ├── Configuration/  # Mapeia INetworkConfiguration
-│   │   │   ├── Packet/         # IPacketRegistry
-│   │   │   ├── Serializer/     # INetworkSerializer
-│   │   │   └── Sender/         # IPacketSender
-│   │   │
-│   │   └── SerializerAdapter/  # Adapter genérico de serialização
-│   │
-│   └── Inbound/                # Driving Adapters (externo → Core)
-│       └── Messaging/          # Eventos de rede para Input Ports
-│           └── Subscribers/    # Inscrições nos eventos
-│
-└── Infrastructure/             # Infraestrutura
-    └── DependencyInjection/    # Configuração de injeção de dependência
-│
-├── Shared/                     # Código compartilhado entre camadas
-│   ├── Kernel/                 # Flags, enums e DTOs genéricos
-│   └── Utils/                  # Helpers, extensions e utilitários
-│
-└── tests/                      # Projetos de teste
-    ├── CoreTests/              # Unit tests (Domain + Application)
-    └── AdaptersTests/          # Integration tests (Adapters)
+    NetworkHexagonal.csproj
+    PROJECT_STRUCTURE.md
+    Adapters/
+        Outbound/
+            LiteNetLibAdapter/
+                LiteNetLibAdapter.cs
+            Networking/
+                Serializer/
+    Core/
+        Application/
+            Ports/
+                INetworkReader.cs
+                INetworkSerializable.cs
+                INetworkWriter.cs
+                IPacket.cs
+                Input/
+                Output/
+            Services/
+                ClientApp.cs
+                ServerApp.cs
+        Domain/
+            Entities/
+            Exceptions/
+            ValueObjects/
+    Infrastructure/
+        DependencyInjection/
+            ServiceCollectionExtensions.cs
+    Shared/
+        Kernel/
+        Utils/
+NetworkHexagonal.Tests/
+    NetworkHexagonal.Tests.csproj
+    AdaptersTests/
+        AdaptersTests.cs
+    CoreTests/
+        CoreTests.cs
+```
+
+## Submódulo Externo: LiteNetLib
+
+- O projeto utiliza o LiteNetLib como submódulo Git em `External/LiteNetLib`.
+- Para clonar o repositório com o submódulo, use:
+
+```sh
+git clone --recurse-submodules https://github.com/MonoDevPro/HexagonalNetwork.git
+```
+
+- Se já clonou sem submódulos, inicialize e atualize com:
+
+```sh
+git submodule update --init --recursive
+```
+
+- Para atualizar o submódulo para a última versão:
+
+```sh
+cd External/LiteNetLib
+git checkout main
+git pull origin main
+cd ../..
+git add External/LiteNetLib
+git commit -m "chore: atualiza submódulo LiteNetLib"
+git push
+```
+
+## Observações
+- O Core não referencia Adapters ou Infrastructure.
+- Adapters isolam dependências externas.
+- Application Layer orquestra o ciclo de vida de client/server.
+- Infrastructure centraliza DI e configurações.
+- Testes cobrem domínio, aplicação e integração real dos adapters.
 
 ## Como usar
 

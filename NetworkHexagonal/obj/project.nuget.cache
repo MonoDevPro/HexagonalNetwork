@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "688eXWPy6l0=",
+  "dgSpecHash": "Q/vo2B+GL+g=",
   "success": true,
   "projectFilePath": "/home/filipe/Desenvolvimento/NetworkHexagonal/NetworkHexagonal/NetworkHexagonal.csproj",
   "expectedPackageFiles": [
-    "/home/filipe/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/9.0.4/microsoft.extensions.dependencyinjection.abstractions.9.0.4.nupkg.sha512"
+    "/home/filipe/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/9.0.4/microsoft.extensions.dependencyinjection.abstractions.9.0.4.nupkg.sha512",
+    "/home/filipe/.nuget/packages/microsoft.extensions.logging.abstractions/9.0.4/microsoft.extensions.logging.abstractions.9.0.4.nupkg.sha512"
   ],
   "logs": []
 }

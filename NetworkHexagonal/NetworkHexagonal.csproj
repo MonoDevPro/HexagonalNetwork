@@ -8,6 +8,17 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.4" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../External/LiteNetLib/LiteNetLib/LiteNetLib.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>$(DefineConstants);NETWORK_UNSAFE</DefineConstants>
+  </PropertyGroup>
+  
 
 </Project>

@@ -2,6 +2,11 @@ namespace NetworkHexagonal.Core.Application.Ports
 {
     public interface INetworkReader
     {
+        bool AtEndOfStream { get; }
+        long BytesLeft { get; }
+        void Read<T>(out T result) where T : INetworkSerializable, new();
+        byte ReadByte();
+        sbyte ReadSByte();
         int ReadInt();
         long ReadLong();
         short ReadShort();
@@ -10,11 +15,10 @@ namespace NetworkHexagonal.Core.Application.Ports
         ulong ReadULong();
         float ReadFloat();
         double ReadDouble();
-        decimal ReadDecimal();
         char ReadChar();
         bool ReadBool();
+        byte[] ReadByteArray();
         string ReadString();
-        byte[] ReadBytes(int length);
         int[] ReadIntArray();
         float[] ReadFloatArray();
         long[] ReadLongArray();
