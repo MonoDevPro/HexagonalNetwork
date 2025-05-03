@@ -1,83 +1,77 @@
-using System.Net;
-using NetworkHexagonal.Core.Application.Ports;
-using NetworkHexagonal.Core.Application.Ports.Input;
-using NetworkHexagonal.Core.Application.Ports.Output;
+using NetworkHexagonal.Core.Application.Ports.Outbound;
+using NetworkHexagonal.Core.Domain.Events;
 
 namespace NetworkHexagonal.Core.Application.Services
 {
-    public class ServerApp : IServerNetworkService
+    public interface IServerApp
+    {
+        public event Action<ConnectionRequestEvent> OnConnectionRequest;
+        public event Action<ConnectionEvent> OnPeerConnected;
+        public event Action<DisconnectionEvent> OnPeerDisconnected;
+        public event Action<NetworkErrorEvent> OnError;
+        void DisconnectPeer(int peerId);
+        void Dispose();
+        void Initialize();
+        void Start(int port);
+        void Stop();
+        void Update();
+    }
+
+    public class ServerApp : IServerApp
     {
         private readonly IServerNetworkService _serverNetworkService;
         private readonly IPacketSender _packetSender;
         private readonly IPacketRegistry _packetRegistry;
         private readonly INetworkConfiguration _config;
-        
-        public event Action<bool, IPEndPoint>? OnConnectionRequest;
-        public event Action<int>? OnPeerConnected;
-        public event Action<int>? OnPeerDisconnected;
-        public event Action<int, int>? OnPingReceivedFromPeer;
-        public event Action<int>? OnPacketReceivedFromPeer;
+
+        public event Action<ConnectionRequestEvent>? OnConnectionRequest;
+        public event Action<ConnectionEvent>? OnPeerConnected;
+        public event Action<DisconnectionEvent>? OnPeerDisconnected;
+        public event Action<NetworkErrorEvent>? OnError;
 
         public ServerApp(
-            INetworkService networkService,
+            IServerNetworkService networkService,
             IPacketSender packetSender,
             IPacketRegistry packetRegistry,
             INetworkConfiguration config)
         {
-            if (networkService is not IServerNetworkService serverNetworkService)
-            {
-                throw new ArgumentException("networkService must implement IServerNetworkService");
-            }
-            
-            _serverNetworkService = serverNetworkService;
+            _serverNetworkService = networkService;
             _packetSender = packetSender;
             _packetRegistry = packetRegistry;
             _config = config;
 
-            // Registrar eventos de conexão
-            _serverNetworkService.OnConnectionRequest += (accept, endPoint) =>
+            // Registrar eventos
+            _serverNetworkService.OnConnectionRequest += (request) =>
             {
-                OnConnectionRequest?.Invoke(accept, endPoint);
+                OnConnectionRequest?.Invoke(request);
             };
-            _serverNetworkService.OnPeerConnected += (peerId) =>
+            _serverNetworkService.OnPeerConnected += (peer) =>
             {
-                OnPeerConnected?.Invoke(peerId);
+                OnPeerConnected?.Invoke(peer);
             };
-            _serverNetworkService.OnPeerDisconnected += (peerId) =>
+            _serverNetworkService.OnPeerDisconnected += (peer) =>
             {
-                OnPeerDisconnected?.Invoke(peerId);
+                OnPeerDisconnected?.Invoke(peer);
             };
-            _serverNetworkService.OnPingReceivedFromPeer += (peerId, ping) =>
+            _serverNetworkService.OnError += (error) =>
             {
-                OnPingReceivedFromPeer?.Invoke(peerId, ping);
-            };
-            // Registrar eventos de recebimento de pacotes
-            _serverNetworkService.OnPacketReceivedFromPeer += (peerId) =>
-            {
-                OnPacketReceivedFromPeer?.Invoke(peerId);
+                OnError?.Invoke(error);
             };
         }
 
         public void Initialize()
         {
-            _serverNetworkService.Initialize();
-            _serverNetworkService.Configure(_config);
             // Registrar pacotes padrão se necessário
-        }
-
-        public void Configure(INetworkConfiguration config)
-        {
-            _serverNetworkService.Configure(config);
         }
 
         public void Dispose()
         {
-            _serverNetworkService.Dispose();
+            // Desregistrar pacotes se necessário
         }
 
-        public void Start()
+        public void Start(int port)
         {
-            _serverNetworkService.Start();
+            _serverNetworkService.Start(port);
             // Disparar evento de inicialização se necessário
         }
 

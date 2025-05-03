@@ -15,6 +15,10 @@
     <ProjectReference Include="../External/LiteNetLib/LiteNetLib/LiteNetLib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Adapters\Outbound\Networking\Packet\" />
+  </ItemGroup>
+
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);NETWORK_UNSAFE</DefineConstants>

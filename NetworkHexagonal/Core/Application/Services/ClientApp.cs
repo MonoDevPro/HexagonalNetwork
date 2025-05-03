@@ -1,79 +1,61 @@
-using System.Threading.Tasks;
-using NetworkHexagonal.Core.Application.Ports;
-using NetworkHexagonal.Core.Application.Ports.Input;
-using NetworkHexagonal.Core.Application.Ports.Output;
+using NetworkHexagonal.Core.Application.Ports.Inbound;
+using NetworkHexagonal.Core.Application.Ports.Outbound;
+using NetworkHexagonal.Core.Domain.Events;
 
 namespace NetworkHexagonal.Core.Application.Services
 {
-    public class ClientApp : IClientNetworkService
+    public class ClientApp : IClientApp
     {
         private readonly IClientNetworkService _clientNetworkService;
         private readonly IPacketSender _packetSender;
         private readonly IPacketRegistry _packetRegistry;
         private readonly INetworkConfiguration _config;
 
-        public event Action? OnConnected;
-        public event Action<string>? OnDisconnected;
-        public event Action<int>? OnPingReceived;
-        public event Action<int>? OnPacketReceived;
+        public event Action<ConnectionEvent>? OnConnected;
+        public event Action<DisconnectionEvent>? OnDisconnected;
+        public event Action<NetworkErrorEvent>? OnError;
 
         public ClientApp(
-            INetworkService networkService,
+            IClientNetworkService networkService,
             IPacketSender packetSender,
             IPacketRegistry packetRegistry,
             INetworkConfiguration config)
         {
-            if (networkService is not IClientNetworkService clientNetworkService)
-            {
-                throw new ArgumentException("networkService must implement IClientNetworkService");
-            }
-
-            _clientNetworkService = clientNetworkService;
+            _clientNetworkService = networkService;
             _packetSender = packetSender;
             _packetRegistry = packetRegistry;
             _config = config;
 
             // Registrar eventos de conexão
-            _clientNetworkService.OnConnected += () =>
+            _clientNetworkService.OnConnected += (connectionEvent) =>
             {
-                OnConnected?.Invoke();
+                OnConnected?.Invoke(connectionEvent);
             };
-            _clientNetworkService.OnDisconnected += (reason) =>
+            _clientNetworkService.OnDisconnected += (disconnectionEvent) =>
             {
-                OnDisconnected?.Invoke(reason);
+                OnDisconnected?.Invoke(disconnectionEvent);
             };
-            _clientNetworkService.OnPingReceived += (ping) =>
+            _clientNetworkService.OnError += (errorEvent) =>
             {
-                OnPingReceived?.Invoke(ping);
-            };
-            // Registrar eventos de recebimento de pacotes
-            _clientNetworkService.OnPacketReceived += (peerId) =>
-            {
-                OnPacketReceived?.Invoke(peerId);
+                OnError?.Invoke(errorEvent);
             };
         }
 
         public void Initialize()
         {
-            _clientNetworkService.Initialize();
-            _clientNetworkService.Configure(_config);
+            
             // Aqui você pode registrar pacotes padrão
-        }
-
-        public void Configure(INetworkConfiguration config)
-        {
-            _clientNetworkService.Configure(config);
         }
 
         public void Dispose()
         {
-            _clientNetworkService.Dispose();
+            
         }
 
-        public async Task ConnectAsync(int timeoutMs = 5000)
+        public async Task ConnectAsync(string serverAddress, int port, int timeoutMs = 5000)
         {
             // Supondo que o adapter tenha um método ConnectAsync
-            await _clientNetworkService.ConnectAsync(timeoutMs);
+            await _clientNetworkService.ConnectAsync(serverAddress, port, timeoutMs);
             //OnConnected?.Invoke();
         }
 

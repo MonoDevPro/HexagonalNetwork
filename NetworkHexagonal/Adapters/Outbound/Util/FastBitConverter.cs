@@ -1,8 +1,6 @@
-using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
-namespace LiteNetLib.Utils
+namespace NetworkHexagonal.Adapters.Outbound.Util
 {
     public static class FastBitConverter
     {
