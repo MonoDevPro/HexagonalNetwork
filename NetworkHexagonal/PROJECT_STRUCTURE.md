@@ -1,51 +1,104 @@
 # Estrutura do Projeto Hexagonal Network
 
+## Visão Geral
+
+Este projeto implementa um módulo de rede para aplicações distribuídas usando arquitetura hexagonal (ou ports and adapters), permitindo total desacoplamento entre a lógica de negócios e as implementações específicas de rede.
+
+## Estrutura de Diretórios
+
 ```
 NetworkHexagonal.sln
 README.md
 External/
     LiteNetLib/   # Submódulo Git: https://github.com/MonoDevPro/LiteNetLib
-Infrastructure/
-    DependencyInjection/
-        ServiceCollectionExtensions.cs
 NetworkHexagonal/
     NetworkHexagonal.csproj
     PROJECT_STRUCTURE.md
     Adapters/
         Outbound/
-            LiteNetLibAdapter/
-                LiteNetLibAdapter.cs
-            Networking/
-                Serializer/
+            Network/
+                LiteNetLibClientAdapter.cs
+                LiteNetLibServerAdapter.cs
+                LiteNetLibConnectionManagerAdapter.cs
+                LiteNetLibPacketHandlerAdapter.cs
+                LiteNetLibPacketRegistryAdapter.cs
+                LiteNetLibPacketSenderAdapter.cs
+            Serialization/
+                NetworkReaderAdapter.cs
+                NetworkWriterAdapter.cs
+                LiteNetLibSerializerAdapter.cs
+            Util/
+                FastBitConverter.cs
+                ObjectPool.cs
     Core/
         Application/
             Ports/
-                INetworkReader.cs
-                INetworkSerializable.cs
-                INetworkWriter.cs
-                IPacket.cs
-                Input/
-                Output/
+                Inbound/
+                    IClientApp.cs
+                    IServerApp.cs
+                Outbound/
+                    INetworkReader.cs
+                    INetworkWriter.cs
+                    INetworkSerializer.cs
+                    INetworkServices.cs
             Services/
                 ClientApp.cs
                 ServerApp.cs
+                NetworkEventBus.cs
         Domain/
-            Entities/
+            Enums/
+                DeliveryMode.cs
+                DisconnectReason.cs
+            Events/
+                NetworkEvents.cs
+            Models/
+                ConnectionRequestEventArgs.cs
+                ConnectionRequestInfo.cs
+                ConnectionResult.cs
+                IPacket.cs
+                NetworkModels.cs
+                PacketContext.cs
             Exceptions/
-            ValueObjects/
+                NetworkExceptions.cs
     Infrastructure/
         DependencyInjection/
             ServiceCollectionExtensions.cs
-    Shared/
-        Kernel/
-        Utils/
-NetworkHexagonal.Tests/
-    NetworkHexagonal.Tests.csproj
+NetworkTests/
+    NetworkTests.csproj
     AdaptersTests/
-        AdaptersTests.cs
+        Network/
+            LiteNetLibPacketRegistryAdapterTests.cs
+            NetworkDisconnectionTests.cs
+            NetworkIntegrationTest.cs
+        Serialization/
+            SerializerTests.cs
     CoreTests/
-        CoreTests.cs
+        Application/
+            NetworkEventBusTests.cs
 ```
+
+## Arquitetura Hexagonal (Ports & Adapters)
+
+O projeto segue o padrão de arquitetura hexagonal com:
+
+### Core (Hexágono)
+
+- **Domain**: Contém os modelos, eventos, exceções e enumerações relacionados ao domínio da rede.
+- **Application**: Contém a lógica de negócios e define as portas (interfaces) que o domínio expõe e consome.
+  - **Ports/Inbound**: Interfaces que o mundo externo usa para interagir com o aplicativo.
+  - **Ports/Outbound**: Interfaces que o aplicativo usa para interagir com serviços externos.
+  - **Services**: Implementações das interfaces inbound que orquestram a lógica de negócios.
+
+### Adapters
+
+- **Outbound Adapters**: Implementações de portas de saída que interagem com recursos externos (LiteNetLib).
+  - **Network**: Adapta a biblioteca LiteNetLib para as interfaces definidas no core.
+  - **Serialization**: Fornece implementações de serialização/deserialização de rede.
+  - **Util**: Classes utilitárias para otimização e pooling.
+
+### Infrastructure
+
+- **DependencyInjection**: Configuração de injeção de dependência para conectar portas às implementações de adaptadores.
 
 ## Submódulo Externo: LiteNetLib
 
@@ -74,10 +127,36 @@ git commit -m "chore: atualiza submódulo LiteNetLib"
 git push
 ```
 
+## Componentes Principais
+
+### Core Domain
+
+- **IPacket**: Interface fundamental para objetos que podem ser serializados e transmitidos pela rede.
+- **NetworkEvents**: Define eventos padronizados para conexão, desconexão e comunicação de rede.
+- **DeliveryMode**: Define os modos de entrega de pacotes (Unreliable, ReliableOrdered, etc.).
+
+### Core Application
+
+- **IClientApp/IServerApp**: Interfaces inbound para interagir com cliente e servidor.
+- **ClientApp/ServerApp**: Implementações que orquestram os serviços de rede.
+- **NetworkEventBus**: Intermediário para gerenciar eventos de rede.
+
+### Adapters
+
+- **LiteNetLibClientAdapter/LiteNetLibServerAdapter**: Adaptadores para cliente e servidor usando LiteNetLib.
+- **LiteNetLibPacketRegistryAdapter**: Gerencia registro e processamento de pacotes.
+- **LiteNetLibSerializerAdapter**: Implementa serialização baseada em LiteNetLib.
+
+## Testes
+
+- **NetworkIntegrationTest**: Testes de integração para comunicação cliente-servidor.
+- **SerializerTests**: Testes unitários para serialização/deserialização.
+- **NetworkEventBusTests**: Testes para o sistema de eventos de rede.
+
 ## Observações
-- O Core não referencia Adapters ou Infrastructure.
-- Adapters isolam dependências externas.
-- Application Layer orquestra o ciclo de vida de client/server.
+- O Core não referencia Adapters ou Infrastructure diretamente.
+- Adapters isolam dependências externas completamente.
+- Application Layer orquestra o ciclo de vida de client/server usando apenas interfaces.
 - Infrastructure centraliza DI e configurações.
 - Testes cobrem domínio, aplicação e integração real dos adapters.
 
@@ -88,20 +167,10 @@ git push
 2. **DI / Composition Root**  
    No seu projeto de inicialização (ex: `Startup.cs` ou similar), faça o mapeamento:  
    ```csharp
-   services.AddSingleton<INetworkConfiguration, NetworkConfiguration>();
-   services.AddTransient<IPacketRegistry, LiteNetLibPacketRegistry>();
-   services.AddScoped<INetworkSerializer, LiteNetLibSerializer>();
-   services.AddScoped<IPacketSender, LiteNetLibSender>();
-   services.AddScoped<IClientNetworkService, ClientNetworkService>();
-   services.AddScoped<IServerNetworkService, ServerNetworkService>();
+   services.AddNetworking();
    ```  
 3. **Manutenção**  
    - Mantenha o Core livre de referências a LiteNetLib.  
-   - Se precisar trocar de biblioteca, implemente novos Adapters sem alterar `src/Core`.  
-4. **Documentação e Automação**  
-   - Atualize este arquivo sempre que criar novas Ports ou Adapters.  
-   - Ferramentas de CI/agent podem ler este documento para validar convenções.
-
----
-
-> **Dica:** personalize caminhos e nomes de namespaces conforme sua convenção de naming.
+   - Se precisar trocar de biblioteca, implemente novos Adapters sem alterar `Core`.  
+4. **Documentação**  
+   - Consulte arquivos em `/docs` para documentação adicional sobre componentes específicos.
