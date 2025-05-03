@@ -30,6 +30,14 @@ namespace NetworkTests.Console
                 Message = reader.ReadString();
             }
         }
+
+        public class NetworkConfiguration : INetworkConfiguration
+        {
+            public int UpdateIntervalMs { get; set; } = 15;
+            public int DisconnectTimeoutMs { get; set; } = 5000;
+            public string ConnectionKey { get; set; } = "default_key";
+            public bool UseUnsyncedEvents { get; } = true;
+        }
         
         static async Task Main(string[] args)
         {
@@ -40,6 +48,9 @@ namespace NetworkTests.Console
             
             // Configura logging
             services.AddLogging(configure => configure.AddConsole());
+
+            // Registra configuração de rede
+            services.AddSingleton<INetworkConfiguration, NetworkConfiguration>();
             
             // Registra serviços de rede
             services.AddNetworking();
