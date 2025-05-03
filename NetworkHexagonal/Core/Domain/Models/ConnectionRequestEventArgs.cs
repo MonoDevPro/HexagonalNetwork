@@ -2,8 +2,6 @@ using System;
 
 namespace NetworkHexagonal.Core.Domain.Models
 {
-
-    
     /// <summary>
     /// Argumentos para um evento de requisição de conexão
     /// </summary>
