@@ -1,8 +1,0 @@
-{
-    "dotnet.defaultSolution": "NetworkHexagonal.sln",
-    "nunitTestRunner.projectsPatterns": [
-        "**/bin/*.Tests.dll",
-        "**/bin/*Tests.dll",
-        "**/NetworkTests/bin/Debug/net*/NetworkTests.dll"
-    ]
-}
