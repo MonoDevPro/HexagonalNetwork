@@ -18,6 +18,7 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
         private readonly ILogger<LiteNetLibClientAdapter> _logger;
         private readonly LiteNetLibPacketHandlerAdapter _packetHandler;
         private readonly INetworkConfiguration _config;
+        private readonly LiteNetLibConnectionManagerAdapter _connectionManager;
         private NetPeer? _serverPeer;
         private TaskCompletionSource<ConnectionResult>? _connectionTcs;
         
@@ -28,11 +29,13 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
         public LiteNetLibClientAdapter(
             INetworkConfiguration config, 
             LiteNetLibPacketHandlerAdapter packetHandler,
+            LiteNetLibConnectionManagerAdapter connectionManager,
             ILogger<LiteNetLibClientAdapter> logger)
         {
             _logger = logger;
             _packetHandler = packetHandler;
             _config = config;
+            _connectionManager = connectionManager;
             
             _listener = new EventBasedNetListener();
             _netManager = new NetManager(_listener)
@@ -86,6 +89,7 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
             if (_serverPeer != null)
             {
                 _serverPeer.Disconnect();
+                _connectionManager.UnregisterPeer(0); // Desregistra o servidor ao desconectar
                 _serverPeer = null;
             }
             
@@ -125,12 +129,22 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
             _listener.PeerConnectedEvent += peer => {
                 _logger.LogInformation("Conectado ao servidor: {PeerId}", peer.Id);
                 _connectionTcs?.TrySetResult(new ConnectionResult(true, string.Empty)); // Corrigido: string vazia em vez de null
+                
+                // Registra o peer do servidor com ID 0 para o cliente poder referenciá-lo facilmente
+                _connectionManager.RegisterPeer(0, peer);
+                _serverPeer = peer;
+                
                 OnConnected?.Invoke(new ConnectionEvent(peer.Id));
             };
             
             _listener.PeerDisconnectedEvent += (peer, info) => {
                 _logger.LogInformation("Desconectado do servidor: {PeerId}, Motivo: {Reason}", 
                     peer.Id, info.Reason);
+                
+                // Remove o peer do servidor do registro ao desconectar
+                _connectionManager.UnregisterPeer(0);
+                _serverPeer = null;
+                
                 OnDisconnected?.Invoke(new DisconnectionEvent(peer.Id, 
                     MapDisconnectReasonToDomain(info.Reason)));
             };
