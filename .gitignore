@@ -1,11 +1,11 @@
 .github/prompts/
 
 # Build e artefatos do .NET
-bin/
-obj/
+*bin/
+*obj/
 
 # Arquivos de testes e cobertura
-TestResults/
+*TestResults/
 *.trx
 *.coverage*
 *.testlog
@@ -23,7 +23,7 @@ TestResults/
 *.DS_Store
 
 # Rider/JetBrains
-.idea/
+*.idea/
 *.sln.iml
 *.dotCover
 *.dotCover.*
