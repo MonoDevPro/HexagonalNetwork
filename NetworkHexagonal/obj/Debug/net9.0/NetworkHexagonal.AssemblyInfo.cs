@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NetworkHexagonal")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f9131b09ce4811e23c485e1f3a1215811d09be7c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+52cc560e63fb9731253536e13af0d1b8b7ec0051")]
 [assembly: System.Reflection.AssemblyProductAttribute("NetworkHexagonal")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NetworkHexagonal")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

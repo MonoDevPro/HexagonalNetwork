@@ -1,1 +1,51 @@
 .github/prompts/
+
+# Build e artefatos do .NET
+bin/
+obj/
+
+# Arquivos de testes e cobertura
+TestResults/
+*.trx
+*.coverage*
+*.testlog
+
+# Arquivos temporários e de cache
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.DS_Store
+
+# Rider/JetBrains
+.idea/
+*.sln.iml
+*.dotCover
+*.dotCover.*
+*.resharper
+*.ReSharper
+*.Rider
+
+# VSCode
+.vscode/
+
+# Arquivos de pacotes NuGet
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.nupkg
+*.snupkg
+
+# Arquivos de build do DocFX
+External/LiteNetLib/docfx_project/_site/
+External/LiteNetLib/docfx_project/api/
+External/LiteNetLib/docs/
+
+# Outros
+*.orig
+*.rej
