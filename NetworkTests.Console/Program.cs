@@ -1,160 +1,262 @@
-﻿
-// using System.Collections.Concurrent;
-// using Microsoft.Extensions.Logging;
-// using NetworkHexagonal.Adapters.Outbound.LiteNetLibAdapter;
-// using NetworkHexagonal.Adapters.Outbound.Networking.Serializer;
-// using NetworkHexagonal.Core.Application.Ports;
-// using NetworkHexagonal.Core.Application.Ports.Input;
-// using NetworkHexagonal.Core.Application.Ports.Output;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using NetworkHexagonal.Core.Application.Ports.Outbound;
+using NetworkHexagonal.Core.Domain.Events;
+using NetworkHexagonal.Core.Domain.Models;
+using NetworkHexagonal.Infrastructure.DependencyInjection;
 
-public static class Program
+namespace NetworkTests.Console
 {
-//     private static ILogger<LiteNetLibIntegrationPacket> _logger;
-//     private static INetworkSerializer _serializer;
-//     private static INetworkConfiguration _config;
-
-//     private static LiteNetLibAdapter _serverAdapter;
-//     private static LiteNetLibAdapter _clientAdapter;
-
-//     private static IServerNetworkService _server;
-//     private static IClientNetworkService _client;
-
-//     private static Task? _updateTask;
-//     private static int _updateCounts = 0;
-//     private static ConcurrentBag<INetworkService> _updateTasksBag = new ConcurrentBag<INetworkService>();
-//     private static CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-
-     public static async Task Main(string[] args)
-     {
-//         _logger = LoggerFactory.Create(
-//             builder => builder
-//                 .AddConsole()
-//                 .SetMinimumLevel(LogLevel.Debug))
-//                 .CreateLogger<LiteNetLibIntegrationPacket>();
-
-//         _serializer = new SerializerAdapter();
-
-//         _config = new NetworkConfiguration
-//         {
-//             Ip = "127.0.0.1",
-//             Port = 8090,
-//             ConnectionKey = "test",
-//             UpdateInterval = TimeSpan.FromMilliseconds(15),
-//             PingInterval = TimeSpan.FromSeconds(1),
-//             DisconnectTimeout = TimeSpan.FromSeconds(5),
-//             UnsyncedEvents = true
-//         };
-
-//         var serverLog = LoggerFactory.Create(
-//             builder => builder
-//                 .AddConsole()
-//                 .SetMinimumLevel(LogLevel.Information))
-//                 .CreateLogger<IServerNetworkService>();
-//         var clientLog = LoggerFactory.Create(
-//             builder => builder
-//                 .AddConsole()
-//                 .SetMinimumLevel(LogLevel.Information))
-//                 .CreateLogger<IClientNetworkService>();
-//         _serverAdapter = new LiteNetLibAdapter(_serializer, _config, serverLog);
-//         _clientAdapter = new LiteNetLibAdapter(_serializer, _config, clientLog);
-
-//         _updateTask = Task.Run(async() =>
-//         {
-//             int updateInterval = 15;
-//             int ticksPerLog = (int)Math.Round(1000.0 / updateInterval);
-//             _updateCounts = 0;
-
-//             while (!_cancellationTokenSource.Token.IsCancellationRequested)
-//             {
-//                 foreach (var task in _updateTasksBag)
-//                     task.Update();
-
-//                 _updateCounts++;
-
-//                 if (_updateCounts % ticksPerLog == 0)
-//                 {
-//                     // _logger.LogInformation(
-//                     // "Services Count: {servicesCount}\n" +
-//                     // "Ticks: {ticks}\n" +
-//                     // "Update Counts: {count}",
-//                     // _updateTasksBag.Count,
-//                     // _updateCounts,
-//                     // _updateCounts);
-//                 }
-//                 await Task.Delay(updateInterval, _cancellationTokenSource.Token);
-//             }
-
-//             _logger.LogInformation("Update loop stopped.");
-//         }, _cancellationTokenSource.Token);
-
-//         _server = _serverAdapter;
-//         _client = _clientAdapter;
-
-//         _server.Initialize();
-//         _client.Initialize();
-
-//         // Usando o adapter, pois ainda não separamos o registro de pacotes conforme o nosso domínio.
-//         _serverAdapter.Register<LiteNetLibIntegrationPacket>();
-//         _clientAdapter.Register<LiteNetLibIntegrationPacket>();
-
-//         // Inicia o servidor
-//         _server.Start();
-//         _updateTasksBag.Add(_serverAdapter);
-
-//         _server.OnConnectionRequest += (success, endPoint) =>
-//         {
-//             _logger.LogInformation("Connection request result: {sucess} from {endPoint}", success, endPoint);
-//         };
-//         _server.OnPeerConnected += (peerId) =>
-//         {
-//             _logger.LogInformation("Peer connected: {peerId}", peerId);
-//         };
-//         _server.OnPeerDisconnected += (peerId) =>
-//         {
-//             _logger.LogInformation("Peer disconnected: {peerId}", peerId);
-//         };
-//         _server.OnPingReceivedFromPeer += (peerId, ping) =>
-//         {
-//             _logger.LogInformation("Ping received from peer: {peerId} - {ping}", peerId, ping);
-//         };
-
-//         // Inicia o cliente
-//         // Teste de Conexão -> Conectar o cliente ao servidor
-//         bool connected = false;
-//         _client.OnConnected += () =>
-//         {
-//             connected = true;
-//             _logger.LogInformation("Client connected to server.");
-//             _updateTasksBag.Add(_clientAdapter);
-//         };
-
-//         _client.OnDisconnected += (reason) =>
-//         {
-//             connected = false;
-//             _logger.LogInformation($"Client disconnected from server. ({reason})");
-//         };
-
-//         _client.OnPingReceived += (ping) =>
-//         {
-//             _logger.LogInformation("Ping received from server: {ping}", ping);
-//         };
-
-//          await _client.ConnectAsync(5000);
-
-//          if (!connected)
-//          {
-//              _logger.LogError("Falha ao conectar ao servidor.");
-//              return;
-//          }
-
-//         // Pressione qualquer tecla para encerrar
-//         await Task.Delay(-1, _cancellationTokenSource.Token);
-     }
+    public class Program
+    {
+        // Exemplo de pacote para comunicação cliente-servidor
+        public class ChatMessage : IPacket, ISerializable
+        {
+            public string Sender { get; set; }
+            public string Message { get; set; }
+            
+            public void Serialize(INetworkWriter writer)
+            {
+                writer.WriteString(Sender);
+                writer.WriteString(Message);
+            }
+            
+            public void Deserialize(INetworkReader reader)
+            {
+                Sender = reader.ReadString();
+                Message = reader.ReadString();
+            }
+        }
+        
+        static async Task Main(string[] args)
+        {
+            System.Console.WriteLine("NetworkHexagonal - Demo de Chat");
+            System.Console.WriteLine("-----------------------------");
+            
+            var services = new ServiceCollection();
+            
+            // Configura logging
+            services.AddLogging(configure => configure.AddConsole());
+            
+            // Registra serviços de rede
+            services.AddNetworking();
+            
+            // Constrói o provedor de serviços
+            var serviceProvider = services.BuildServiceProvider();
+            
+            // Obtém logger para o programa principal
+            var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+            
+            if (args.Length == 0 || args[0] == "-h" || args[0] == "--help")
+            {
+                System.Console.WriteLine("Uso: dotnet run -- [server|client] [porta] [endereço]");
+                System.Console.WriteLine("  server    - Inicia em modo servidor");
+                System.Console.WriteLine("  client    - Inicia em modo cliente");
+                System.Console.WriteLine("  porta     - Porta para servidor ou conexão (padrão: 9050)");
+                System.Console.WriteLine("  endereço  - Endereço para conexão (apenas cliente, padrão: localhost)");
+                return;
+            }
+            
+            string mode = args[0].ToLower();
+            int port = args.Length > 1 ? int.Parse(args[1]) : 9050;
+            string address = args.Length > 2 ? args[2] : "localhost";
+            
+            // Obtém serviços de rede
+            var packetRegistry = serviceProvider.GetRequiredService<IPacketRegistry>();
+            
+            // Registra manipuladores de pacotes
+            packetRegistry.RegisterHandler<ChatMessage>((message, context) => {
+                System.Console.ForegroundColor = ConsoleColor.Green;
+                System.Console.WriteLine($"{message.Sender}: {message.Message}");
+                System.Console.ResetColor();
+            });
+            
+            // Inicia modo selecionado
+            if (mode == "server")
+            {
+                await RunServer(serviceProvider, port);
+            }
+            else if (mode == "client")
+            {
+                await RunClient(serviceProvider, address, port);
+            }
+            else
+            {
+                System.Console.WriteLine($"Modo inválido: {mode}");
+                System.Console.WriteLine("Use 'server' ou 'client'");
+            }
+        }
+        
+        static async Task RunServer(IServiceProvider serviceProvider, int port)
+        {
+            var serverService = serviceProvider.GetRequiredService<IServerNetworkService>();
+            var packetSender = serviceProvider.GetRequiredService<IPacketSender>();
+            
+            System.Console.WriteLine($"Iniciando servidor na porta {port}...");
+            if (!serverService.Start(port))
+            {
+                System.Console.WriteLine($"Falha ao iniciar servidor na porta {port}");
+                return;
+            }
+            
+            System.Console.WriteLine("Servidor iniciado! Aguardando conexões...");
+            System.Console.WriteLine("Pressione Ctrl+C para sair");
+            
+            // Armazena peers conectados
+            var connectedPeers = new System.Collections.Generic.HashSet<int>();
+            
+            // Configura manipuladores de eventos
+            serverService.OnPeerConnected += e => {
+                connectedPeers.Add(e.PeerId);
+                System.Console.WriteLine($"Cliente conectado: {e.PeerId}");
+                
+                // Envia mensagem de boas-vindas
+                packetSender.SendPacket(e.PeerId, new ChatMessage { 
+                    Sender = "Servidor", 
+                    Message = "Bem-vindo ao chat!" 
+                });
+                
+                // Notifica outros clientes
+                foreach (var peerId in connectedPeers)
+                {
+                    if (peerId != e.PeerId)
+                    {
+                        packetSender.SendPacket(peerId, new ChatMessage { 
+                            Sender = "Servidor", 
+                            Message = $"Usuário {e.PeerId} entrou no chat" 
+                        });
+                    }
+                }
+            };
+            
+            serverService.OnPeerDisconnected += e => {
+                connectedPeers.Remove(e.PeerId);
+                System.Console.WriteLine($"Cliente desconectado: {e.PeerId}");
+                
+                // Notifica outros clientes
+                foreach (var peerId in connectedPeers)
+                {
+                    packetSender.SendPacket(peerId, new ChatMessage { 
+                        Sender = "Servidor", 
+                        Message = $"Usuário {e.PeerId} saiu do chat" 
+                    });
+                }
+            };
+            
+            // Executa atualizações de rede em loop
+            var cancellationTokenSource = new CancellationTokenSource();
+            System.Console.CancelKeyPress += (sender, e) => {
+                e.Cancel = true;
+                cancellationTokenSource.Cancel();
+            };
+            
+            // Thread para ler entrada do servidor e enviar para todos os clientes
+            _ = Task.Run(() => {
+                while (!cancellationTokenSource.Token.IsCancellationRequested)
+                {
+                    string input = System.Console.ReadLine();
+                    
+                    if (!string.IsNullOrEmpty(input))
+                    {
+                        var message = new ChatMessage { 
+                            Sender = "Servidor", 
+                            Message = input 
+                        };
+                        
+                        foreach (var peerId in connectedPeers)
+                        {
+                            packetSender.SendPacket(peerId, message);
+                        }
+                        
+                        // Exibe também no console do servidor
+                        System.Console.ForegroundColor = ConsoleColor.Yellow;
+                        System.Console.WriteLine($"Servidor: {input}");
+                        System.Console.ResetColor();
+                    }
+                }
+            });
+            
+            // Loop principal para atualizações de rede
+            while (!cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                serverService.Update();
+                await Task.Delay(15);
+            }
+            
+            System.Console.WriteLine("Encerrando servidor...");
+            serverService.Stop();
+        }
+        
+        static async Task RunClient(IServiceProvider serviceProvider, string address, int port)
+        {
+            var clientService = serviceProvider.GetRequiredService<IClientNetworkService>();
+            var packetSender = serviceProvider.GetRequiredService<IPacketSender>();
+            
+            System.Console.WriteLine($"Conectando ao servidor {address}:{port}...");
+            
+            var result = await clientService.ConnectAsync(address, port);
+            if (!result.Success)
+            {
+                System.Console.WriteLine($"Falha ao conectar: {result.ErrorMessage}");
+                return;
+            }
+            
+            System.Console.WriteLine("Conectado ao servidor!");
+            System.Console.WriteLine("Digite mensagens para enviar ou 'exit' para sair");
+            
+            // Executa atualizações de rede em loop
+            var cancellationTokenSource = new CancellationTokenSource();
+            System.Console.CancelKeyPress += (sender, e) => {
+                e.Cancel = true;
+                cancellationTokenSource.Cancel();
+            };
+            
+            // Configura eventos
+            clientService.OnDisconnected += e => {
+                System.Console.WriteLine($"Desconectado do servidor: {e.Reason}");
+                cancellationTokenSource.Cancel();
+            };
+            
+            // Thread para ler entrada do usuário e enviar para o servidor
+            _ = Task.Run(() => {
+                // Solicita nome de usuário
+                System.Console.Write("Digite seu nome de usuário: ");
+                string username = System.Console.ReadLine();
+                
+                while (!cancellationTokenSource.Token.IsCancellationRequested)
+                {
+                    string input = System.Console.ReadLine();
+                    
+                    if (input?.ToLower() == "exit")
+                    {
+                        cancellationTokenSource.Cancel();
+                        continue;
+                    }
+                    
+                    if (!string.IsNullOrEmpty(input))
+                    {
+                        var message = new ChatMessage { 
+                            Sender = username, 
+                            Message = input 
+                        };
+                        
+                        packetSender.SendPacket(0, message); // 0 é o ID do servidor
+                    }
+                }
+            });
+            
+            // Loop principal para atualizações de rede
+            while (!cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                clientService.Update();
+                await Task.Delay(15);
+            }
+            
+            System.Console.WriteLine("Desconectando...");
+            clientService.Disconnect();
+        }
+    }
 }
-
-// public class LiteNetLibIntegrationPacket : IPacket
-// {
-//     public string Message { get; set; } = string.Empty;
-//     public void Serialize(INetworkWriter writer) => writer.Write(Message);
-//     public void Deserialize(INetworkReader reader) => Message = reader.ReadString();
-// }
