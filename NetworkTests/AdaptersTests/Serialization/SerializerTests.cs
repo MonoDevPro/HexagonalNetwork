@@ -138,7 +138,11 @@ namespace NetworkTests.AdaptersTests.Serialization
                 TestInt = 123,
                 TestBool = false,
                 TestFloat = 2.71828f,
-                TestVector = new Vector2(3.0f, 4.0f)
+                TestVector = new Vector2(3.0f, 4.0f),
+                OtherTestPacket = new OtherTestPacket
+                {
+                    Message = "Hello from OtherTestPacket!"
+                }
             };
             
             // Serializa o pacote
@@ -168,6 +172,10 @@ namespace NetworkTests.AdaptersTests.Serialization
                     Assert.That(typedPacket.TestInt, Is.EqualTo(originalPacket.TestInt), "Int values should match");
                     Assert.That(typedPacket.TestBool, Is.EqualTo(originalPacket.TestBool), "Bool values should match");
                     Assert.That(typedPacket.TestFloat, Is.EqualTo(originalPacket.TestFloat), "Float values should match");
+                    Assert.That(typedPacket.TestVector.X, Is.EqualTo(originalPacket.TestVector.X), "Vector X should match");
+                    Assert.That(typedPacket.TestVector.Y, Is.EqualTo(originalPacket.TestVector.Y), "Vector Y should match");
+                    Assert.That(typedPacket.OtherTestPacket.Message, Is.EqualTo(originalPacket.OtherTestPacket.Message), "OtherTestPacket message should match");
+                    // Verifica se OtherTestPacket é nulo, pois não foi definido no original
                 }
                 reader.Recycle();
 
@@ -202,7 +210,7 @@ namespace NetworkTests.AdaptersTests.Serialization
             public bool TestBool { get; set; }
             public float TestFloat { get; set; }
             public Vector2 TestVector { get; set; }
-            public OtherTestPacket OtherTestPacket { get; set; } = new();
+            public OtherTestPacket OtherTestPacket { get; set; } = new OtherTestPacket();
             
             public void Serialize(INetworkWriter writer)
             {
@@ -223,14 +231,14 @@ namespace NetworkTests.AdaptersTests.Serialization
                 TestFloat = reader.ReadFloat();
                 TestVector = reader.ReadVector2();
                 
-                OtherTestPacket.Deserialize(reader);
-                //OtherTestPacket = reader.ReadSerializable<OtherTestPacket>();
+                OtherTestPacket = reader.ReadSerializable<OtherTestPacket>();
             }
         }
         
         public class OtherTestPacket : IPacket, ISerializable
         {
-            public string Message { get; set; } = string.Empty;
+
+            public string Message { get; set; }
             
             public void Serialize(INetworkWriter writer)
             {

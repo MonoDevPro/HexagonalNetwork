@@ -5,8 +5,9 @@ Este projeto implementa um módulo de networking para jogos MMO em C#, seguindo 
 ## Arquitetura Hexagonal
 
 - **Core (Domínio + Ports):**
-  - Interfaces e modelos de domínio (ex: `INetworkConfiguration`, `IPacket`, `INetworkSerializable`, `IClientNetworkService`, `IServerNetworkService`, etc).
-  - Contratos para registro, serialização e envio de pacotes.
+  - Interfaces e modelos de domínio (ex: `INetworkConfiguration`, `IPacket`, `INetworkSerializable`, `IPacketRegistry`, `IClientNetworkApp`, `IServerNetworkApp`,
+  `IPacketRegistry`, `IPacketSender`, etc).
+  - Contratos para registro, serialização, recebimento e envio de pacotes.
   - Não possui dependências externas ou referências a LiteNetLib.
 
 - **Adapters:**
