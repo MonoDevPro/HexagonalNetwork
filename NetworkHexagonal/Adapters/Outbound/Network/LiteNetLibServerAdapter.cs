@@ -5,6 +5,8 @@ using LiteNetLib;
 using NetworkHexagonal.Core.Application.Ports.Outbound;
 using NetworkHexagonal.Core.Domain.Events;
 using NetworkHexagonal.Core.Domain.Models;
+using NetworkHexagonal.Core.Application.Ports.Inbound;
+using NetworkHexagonal.Core.Domain.Events.Network;
 
 namespace NetworkHexagonal.Adapters.Outbound.Network
 {
@@ -19,22 +21,20 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
         private readonly LiteNetLibPacketHandlerAdapter _packetHandler;
         private readonly LiteNetLibConnectionManagerAdapter _connectionManager;
         private readonly INetworkConfiguration _config;
-        
-        public event Action<ConnectionRequestEvent>? OnConnectionRequest;
-        public event Action<ConnectionEvent>? OnPeerConnected;
-        public event Action<DisconnectionEvent>? OnPeerDisconnected;
-        public event Action<NetworkErrorEvent>? OnError;
+        private readonly INetworkEventBus _eventBus;
         
         public LiteNetLibServerAdapter(
             INetworkConfiguration config,
             LiteNetLibPacketHandlerAdapter packetHandler,
             LiteNetLibConnectionManagerAdapter connectionManager,
-            ILogger<LiteNetLibServerAdapter> logger)
+            ILogger<LiteNetLibServerAdapter> logger,
+            INetworkEventBus eventBus)
         {
             _logger = logger;
             _packetHandler = packetHandler;
             _connectionManager = connectionManager;
             _config = config;
+            _eventBus = eventBus;
             
             _listener = new EventBasedNetListener();
             _netManager = new NetManager(_listener)
@@ -44,7 +44,7 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
                 UnsyncedEvents = config.UseUnsyncedEvents // Usa a configuração para determinar o modo de eventos
             };
             
-            _packetHandler.OnError += error => OnError?.Invoke(error);
+            _packetHandler.OnError += error => _eventBus.Publish(error); // Publica erro diretamente no barramento
             
             SetupEventHandlers();
         }
@@ -131,20 +131,23 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
             _listener.PeerConnectedEvent += peer => {
                 _connectionManager.RegisterPeer(peer.Id, peer);
                 _logger.LogInformation("Peer conectado: {PeerId}", peer.Id);
-                OnPeerConnected?.Invoke(new ConnectionEvent(peer.Id));
+                // Publica evento de conexão diretamente no barramento
+                _eventBus.Publish(new ConnectionEvent(peer.Id));
             };
             
             _listener.PeerDisconnectedEvent += (peer, info) => {
                 _connectionManager.UnregisterPeer(peer.Id);
                 _logger.LogInformation("Peer desconectado: {PeerId}, Motivo: {Reason}", 
                     peer.Id, info.Reason);
-                OnPeerDisconnected?.Invoke(new DisconnectionEvent(peer.Id, 
+                // Publica evento de desconexão diretamente no barramento
+                _eventBus.Publish(new DisconnectionEvent(peer.Id, 
                     MapDisconnectReasonToDomain(info.Reason)));
             };
             
             _listener.NetworkErrorEvent += (endPoint, error) => {
                 _logger.LogError("Erro de rede: {Error} de {EndPoint}", error, endPoint);
-                OnError?.Invoke(new NetworkErrorEvent($"Erro de rede: {error} de {endPoint}"));
+                // Publica erro de rede diretamente no barramento
+                _eventBus.Publish(new NetworkErrorEvent($"Erro de rede: {error} de {endPoint}"));
             };
             
             _listener.NetworkReceiveEvent += _packetHandler.HandleNetworkReceive;
@@ -162,7 +165,8 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
                     request.Data.GetString() ?? _config.ConnectionKey);
                 
                 var eventArgs = new ConnectionRequestEventArgs(requestInfo);
-                OnConnectionRequest?.Invoke(new ConnectionRequestEvent(eventArgs));
+                // Publica evento de solicitação de conexão diretamente no barramento
+                _eventBus.Publish(new ConnectionRequestEvent(eventArgs));
                 
                 if (eventArgs.ShouldAccept)
                 {

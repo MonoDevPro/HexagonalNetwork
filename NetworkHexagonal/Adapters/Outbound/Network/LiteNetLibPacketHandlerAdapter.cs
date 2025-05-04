@@ -1,10 +1,8 @@
-using System;
 using LiteNetLib;
-using LiteNetLib.Utils;
 using Microsoft.Extensions.Logging;
 using NetworkHexagonal.Adapters.Outbound.Serialization;
 using NetworkHexagonal.Core.Application.Ports.Outbound;
-using NetworkHexagonal.Core.Domain.Events;
+using NetworkHexagonal.Core.Domain.Events.Network;
 using NetworkHexagonal.Core.Domain.Models;
 
 namespace NetworkHexagonal.Adapters.Outbound.Network
