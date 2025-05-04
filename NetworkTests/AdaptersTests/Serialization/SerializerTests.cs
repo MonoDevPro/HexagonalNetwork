@@ -83,19 +83,16 @@ namespace NetworkTests.AdaptersTests.Serialization
             };
             
             // Serializa o pacote
-            var serializedData = _serializer.Serialize(originalPacket);
+            var serializedWriter = _serializer.Serialize(originalPacket);
             
             // Assegura que o resultado não é nulo
-            Assert.That(serializedData, Is.Not.Null, "Serialized data should not be null");
-            
-            // Cria um reader a partir dos dados serializados
-            var writer = serializedData as LiteNetLib.Utils.NetDataWriter;
-            Assert.That(writer, Is.Not.Null, "Serialized data should be NetDataWriter");
+            Assert.That(serializedWriter, Is.Not.Null, "Serialized data should not be null");
             
             // Verifica se writer não é nulo antes de acessar (corrigir warning CS8602)
-            if (writer != null)
+            if (serializedWriter != null)
             {
-                var reader = new NetworkReaderAdapter(new LiteNetLib.Utils.NetDataReader(writer.Data));
+                var reader = NetworkReaderAdapter.Pool.Get();
+                reader.SetSource(serializedWriter.Data);
                 
                 // Lê o ID do pacote
                 ulong packetId = reader.ReadULong();
@@ -113,7 +110,12 @@ namespace NetworkTests.AdaptersTests.Serialization
                 Assert.That(deserializedPacket.TestFloat, Is.EqualTo(originalPacket.TestFloat), "Float values should match");
                 Assert.That(deserializedPacket.TestVector.X, Is.EqualTo(originalPacket.TestVector.X), "Vector X should match");
                 Assert.That(deserializedPacket.TestVector.Y, Is.EqualTo(originalPacket.TestVector.Y), "Vector Y should match");
+
+                reader.Recycle();
+                // Recycle the writer to the pool
+                serializedWriter.Recycle();
             }
+
         }
         
         [Test]
@@ -133,13 +135,13 @@ namespace NetworkTests.AdaptersTests.Serialization
             };
             
             // Serializa o pacote
-            var serializedData = _serializer.Serialize(originalPacket);
-            var writer = serializedData as LiteNetLib.Utils.NetDataWriter;
+            var serializedWriter = _serializer.Serialize(originalPacket);
             
             // Verifica se writer não é nulo antes de acessar (corrigir warning CS8602)
-            if (writer != null)
+            if (serializedWriter != null)
             {
-                var reader = new NetworkReaderAdapter(new LiteNetLib.Utils.NetDataReader(writer.Data));
+                var reader = NetworkReaderAdapter.Pool.Get();
+                reader.SetSource(serializedWriter.Data);
                 
                 // Lê o ID do pacote
                 ulong packetId = reader.ReadULong();
@@ -160,6 +162,10 @@ namespace NetworkTests.AdaptersTests.Serialization
                     Assert.That(typedPacket.TestBool, Is.EqualTo(originalPacket.TestBool), "Bool values should match");
                     Assert.That(typedPacket.TestFloat, Is.EqualTo(originalPacket.TestFloat), "Float values should match");
                 }
+                reader.Recycle();
+
+                // Recycle the writer to the pool
+                serializedWriter.Recycle();
             }
         }
         

@@ -24,7 +24,7 @@ namespace NetworkHexagonal.Infrastructure.DependencyInjection
             // Barramento de eventos
             services.AddSingleton<INetworkEventBus, NetworkEventBus>();
 
-            // Aplicações
+            // Aplicações -> Portas de entrada
             services.AddSingleton<IServerNetworkApp, ServerApp>();
             services.AddSingleton<IClientNetworkApp, ClientNetworkApp>();
             
