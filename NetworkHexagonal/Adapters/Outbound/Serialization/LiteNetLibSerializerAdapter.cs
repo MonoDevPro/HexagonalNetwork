@@ -1,4 +1,3 @@
-using LiteNetLib.Utils;
 using Microsoft.Extensions.Logging;
 using NetworkHexagonal.Core.Application.Ports.Outbound;
 using NetworkHexagonal.Core.Domain.Exceptions;
@@ -53,20 +52,15 @@ namespace NetworkHexagonal.Adapters.Outbound.Serialization
             return packetId;
         }
         
-        public object Serialize<T>(T packet) where T : IPacket
+        public INetworkWriter Serialize<T>(T packet) where T : IPacket
         {
             try
             {
-                var writer = new NetDataWriter();
+                var writerAdapter = NetworkWriterAdapter.Pool.Get();
                 var packetId = GetPacketId<T>();
-                
-                // Escreve o ID do pacote como cabeçalho
-                writer.Put(packetId);
-                
-                // Escreve os dados do pacote
-                SerializePacket(packet, writer);
-                
-                return writer;
+                writerAdapter.WriteULong(packetId);
+                SerializePacket(packet, writerAdapter); // Usa o adaptador diretamente
+                return writerAdapter; // Retorna o NetDataWriter encapsulado
             }
             catch (Exception ex)
             {
@@ -116,11 +110,11 @@ namespace NetworkHexagonal.Adapters.Outbound.Serialization
             }
         }
         
-        private void SerializePacket<T>(T packet, NetDataWriter writer) where T : IPacket
+        private void SerializePacket<T>(T packet, INetworkWriter writer) where T : IPacket
         {
             if (packet is ISerializable serializablePacket)
             {
-                serializablePacket.Serialize(new NetworkWriterAdapter(writer));
+                serializablePacket.Serialize(writer);
             }
             else
             {

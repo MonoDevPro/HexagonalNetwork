@@ -20,7 +20,7 @@ namespace NetworkHexagonal.Core.Application.Ports.Outbound
         /// <summary>
         /// Serializa um pacote para envio
         /// </summary>
-        object Serialize<T>(T packet) where T : IPacket;
+        INetworkWriter Serialize<T>(T packet) where T : IPacket;
         
         /// <summary>
         /// Deserializa um pacote recebido para o tipo específico
