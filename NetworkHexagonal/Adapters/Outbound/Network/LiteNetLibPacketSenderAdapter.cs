@@ -1,6 +1,7 @@
 using System;
 using LiteNetLib;
 using Microsoft.Extensions.Logging;
+using NetworkHexagonal.Adapters.Outbound.Serialization;
 using NetworkHexagonal.Core.Application.Ports.Outbound;
 using NetworkHexagonal.Core.Domain.Enums;
 using NetworkHexagonal.Core.Domain.Models;
@@ -15,7 +16,7 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
         private readonly ILogger<LiteNetLibPacketSenderAdapter> _logger;
         private readonly INetworkSerializer _serializer;
         private readonly LiteNetLibConnectionManagerAdapter _connectionManager;
-        
+
         public LiteNetLibPacketSenderAdapter(
             INetworkSerializer serializer,
             LiteNetLibConnectionManagerAdapter connectionManager,
@@ -25,11 +26,11 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
             _connectionManager = connectionManager;
             _logger = logger;
         }
-        
+
         /// <summary>
         /// Envia um pacote para um peer específico
         /// </summary>
-        public bool SendPacket<T>(int peerId, T packet, DeliveryMode deliveryMode = DeliveryMode.ReliableOrdered) 
+        public bool SendPacket<T>(int peerId, T packet, DeliveryMode deliveryMode = DeliveryMode.ReliableOrdered)
             where T : IPacket
         {
             try
@@ -40,34 +41,30 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
                     _logger.LogWarning("Não é possível enviar pacote para peer inexistente {PeerId}", peerId);
                     return false;
                 }
-                
+
                 var writer = _serializer.Serialize(packet);
-                if (writer is LiteNetLib.Utils.NetDataWriter dataWriter)
-                {
-                    peer.Send(dataWriter, MapDeliveryMode(deliveryMode));
-                    
-                    _logger.LogTrace("Enviado pacote do tipo {PacketType} para peer {PeerId}", 
+                peer.Send(writer.Data, MapDeliveryMode(deliveryMode));
+
+                _logger.LogTrace("Enviado pacote do tipo {PacketType} para peer {PeerId}",
                         packet.GetType().Name, peerId);
-                    return true;
-                }
-                else
-                {
-                    _logger.LogError("Serializer retornou tipo incompatível: {Type}", writer.GetType().Name);
-                    return false;
-                }
+
+                // Recycle the writer to the pool
+                writer.Recycle();
+
+                return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao enviar pacote do tipo {PacketType} para peer {PeerId}", 
+                _logger.LogError(ex, "Erro ao enviar pacote do tipo {PacketType} para peer {PeerId}",
                     packet.GetType().Name, peerId);
                 return false;
             }
         }
-        
+
         /// <summary>
         /// Envia um pacote para todos os peers conectados
         /// </summary>
-        public bool Broadcast<T>(T packet, DeliveryMode deliveryMode = DeliveryMode.ReliableOrdered) 
+        public bool Broadcast<T>(T packet, DeliveryMode deliveryMode = DeliveryMode.ReliableOrdered)
             where T : IPacket
         {
             try
@@ -78,35 +75,29 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
                     _logger.LogWarning("Não há peers conectados para broadcast");
                     return false;
                 }
-                
+
                 var writer = _serializer.Serialize(packet);
-                if (writer is LiteNetLib.Utils.NetDataWriter dataWriter)
-                {
-                    var liteNetLibDelivery = MapDeliveryMode(deliveryMode);
-                    
-                    foreach (var peer in peers)
-                    {
-                        peer.Send(dataWriter, liteNetLibDelivery);
-                    }
-                    
-                    _logger.LogTrace("Broadcast de pacote do tipo {PacketType} para {PeerCount} peers", 
-                        packet.GetType().Name, peers.Count);
-                    return true;
-                }
-                else
-                {
-                    _logger.LogError("Serializer retornou tipo incompatível: {Type}", writer.GetType().Name);
-                    return false;
-                }
+                var liteNetLibDelivery = MapDeliveryMode(deliveryMode);
+
+                foreach (var peer in peers)
+                    peer.Send(writer.Data, liteNetLibDelivery);
+
+                _logger.LogTrace("Broadcast de pacote do tipo {PacketType} para {PeerCount} peers",
+                    packet.GetType().Name, peers.Count);
+
+                // Recycle the writer to the pool
+                writer.Recycle();
+
+                return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao fazer broadcast de pacote do tipo {PacketType}", 
+                _logger.LogError(ex, "Erro ao fazer broadcast de pacote do tipo {PacketType}",
                     packet.GetType().Name);
                 return false;
             }
         }
-        
+
         /// <summary>
         /// Mapeia os modos de entrega do domínio para os modos do LiteNetLib
         /// </summary>

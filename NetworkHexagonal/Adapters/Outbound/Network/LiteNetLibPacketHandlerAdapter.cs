@@ -33,7 +33,10 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
             try
             {
                 // Obtém o ID do pacote do cabeçalho
-                var networkReader = new NetworkReaderAdapter(reader);
+                
+                var networkReader = NetworkReaderAdapter.Pool.Get();
+                networkReader.SetSource(reader.RawData);
+                networkReader.Reset(reader.Position);
                 var packetId = networkReader.ReadULong();
                 
                 // Cria contexto do pacote
@@ -41,6 +44,8 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
                 
                 // Processa o pacote
                 _packetRegistry.HandlePacket(packetId, networkReader, context);
+
+                networkReader.Recycle();
             }
             catch (Exception ex)
             {
