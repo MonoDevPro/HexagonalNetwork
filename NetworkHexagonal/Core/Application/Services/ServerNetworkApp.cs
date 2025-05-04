@@ -8,8 +8,8 @@ namespace NetworkHexagonal.Core.Application.Services;
 public class ServerApp : IServerNetworkApp
 {
     private readonly IServerNetworkService _serverNetworkService;
-    private readonly INetworkEventBus _eventBus;
 
+    public INetworkEventBus EventBus { get; }
     public IPacketSender PacketSender { get; }
     public IPacketRegistry PacketRegistry { get;}
     public INetworkConfiguration Configuration { get; }
@@ -22,12 +22,12 @@ public class ServerApp : IServerNetworkApp
         INetworkEventBus eventBus)
     {
         _serverNetworkService = networkService;
-        _eventBus = eventBus;
+        EventBus = eventBus;
         PacketSender = packetSender;
         PacketRegistry = packetRegistry;
         Configuration = config;
 
-        _eventBus.Subscribe<ConnectionRequestEvent>(ProcessConnectionRequest);
+        EventBus.Subscribe<ConnectionRequestEvent>(ProcessConnectionRequest);
     }
 
     private void ProcessConnectionRequest(ConnectionRequestEvent connectionRequest)

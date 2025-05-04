@@ -6,6 +6,7 @@ namespace NetworkHexagonal.Core.Application.Ports.Inbound;
 
 public interface IClientNetworkApp
 {
+    INetworkEventBus EventBus { get; }
     IPacketSender PacketSender { get; }
     IPacketRegistry PacketRegistry { get; }
     INetworkConfiguration Configuration { get; }

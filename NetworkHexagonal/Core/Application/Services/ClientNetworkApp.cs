@@ -7,8 +7,7 @@ namespace NetworkHexagonal.Core.Application.Services;
 public class ClientNetworkApp : IClientNetworkApp
 {
     private readonly IClientNetworkService _clientNetworkService;
-    private readonly INetworkEventBus _eventBus;
-
+    public INetworkEventBus EventBus { get; }
     public IPacketSender PacketSender { get; }
     public IPacketRegistry PacketRegistry { get;}
     public INetworkConfiguration Configuration { get; }
@@ -21,7 +20,7 @@ public class ClientNetworkApp : IClientNetworkApp
         INetworkEventBus eventBus)
     {
         _clientNetworkService = networkService;
-        _eventBus = eventBus;
+        EventBus = eventBus;
         PacketSender = packetSender;
         PacketRegistry = packetRegistry;
         Configuration = config;
