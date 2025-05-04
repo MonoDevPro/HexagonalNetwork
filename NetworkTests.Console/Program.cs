@@ -105,7 +105,7 @@ namespace NetworkTests.Console
         
         static async Task RunServer(IServiceProvider serviceProvider, int port)
         {
-            var serverService = serviceProvider.GetRequiredService<IServerNetworkService>();
+            var serverService = serviceProvider.GetRequiredService<IServerNetworkApp>();
             var packetSender = serviceProvider.GetRequiredService<IPacketSender>();
             var eventBus = serviceProvider.GetRequiredService<INetworkEventBus>();
             
@@ -207,7 +207,7 @@ namespace NetworkTests.Console
         
         static async Task RunClient(IServiceProvider serviceProvider, string address, int port)
         {
-            var clientService = serviceProvider.GetRequiredService<IClientNetworkService>();
+            var clientService = serviceProvider.GetRequiredService<IClientNetworkApp>();
             var packetSender = serviceProvider.GetRequiredService<IPacketSender>();
             var eventBus = serviceProvider.GetRequiredService<INetworkEventBus>();
             

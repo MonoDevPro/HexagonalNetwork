@@ -1,6 +1,7 @@
 using NetworkHexagonal.Core.Application.Ports.Inbound;
 using NetworkHexagonal.Core.Application.Ports.Outbound;
 using NetworkHexagonal.Core.Domain.Events;
+using NetworkHexagonal.Core.Domain.Events.Network;
 
 namespace NetworkHexagonal.Core.Application.Services;
 
@@ -25,6 +26,28 @@ public class ServerApp : IServerNetworkApp
         PacketSender = packetSender;
         PacketRegistry = packetRegistry;
         Configuration = config;
+
+        _eventBus.Subscribe<ConnectionRequestEvent>(ProcessConnectionRequest);
+    }
+
+    private void ProcessConnectionRequest(ConnectionRequestEvent connectionRequest)
+    {
+        // Processar solicitação de conexão
+        // Exemplo: Verificar se o cliente pode se conectar com X Ip e Y connectionKey
+        // Se não puder, rejeitar a conexão
+
+        var ip = connectionRequest.EventArgs.RequestInfo.RemoteEndPoint;
+        var connectionKey = connectionRequest.EventArgs.RequestInfo.ConnectionKey;
+        
+        // Podemos facilmente processar uma blacklist de IPs ou verificar se o cliente já está conectado
+        // Também podemos delegar isso para um serviço de autenticação.
+
+        if (connectionKey == Configuration.ConnectionKey)
+            // Aceitar a conexão
+            connectionRequest.EventArgs.ShouldAccept = true;
+        else
+            // Rejeitar a conexão
+            connectionRequest.EventArgs.ShouldAccept = false;
     }
 
     public void Initialize()
