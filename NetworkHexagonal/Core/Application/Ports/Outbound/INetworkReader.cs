@@ -1,4 +1,5 @@
 using System.Numerics;
+using NetworkHexagonal.Core.Domain.Models;
 
 namespace NetworkHexagonal.Core.Application.Ports.Outbound
 {
@@ -22,6 +23,7 @@ namespace NetworkHexagonal.Core.Application.Ports.Outbound
         byte[] ReadBytes(int count);
         Vector2 ReadVector2();
         Vector3 ReadVector3();
+        T ReadSerializable<T>() where T : ISerializable, new();
         
         void Reset(int position = 0);
         int Position { get; }

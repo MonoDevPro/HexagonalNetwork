@@ -32,7 +32,6 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
             try
             {
                 // Obtém o ID do pacote do cabeçalho
-                
                 var networkReader = LiteNetLibReaderAdapter.Pool.Get();
                 networkReader.SetSource(reader.RawData);
                 networkReader.Reset(reader.Position);

@@ -1,6 +1,7 @@
 using System.Numerics;
 using LiteNetLib.Utils;
 using NetworkHexagonal.Core.Application.Ports.Outbound;
+using NetworkHexagonal.Core.Domain.Models;
 using NetworkHexagonal.Shared.Utils;
 
 namespace NetworkHexagonal.Adapters.Outbound.Network;
@@ -49,6 +50,13 @@ public class LiteNetLibReaderAdapter : INetworkReader
     public Vector2 ReadVector2() => new Vector2(_reader.GetFloat(), _reader.GetFloat());
     public Vector3 ReadVector3() => new Vector3(_reader.GetFloat(), _reader.GetFloat(), _reader.GetFloat());
     
+    public T ReadSerializable<T>() where T : ISerializable, new()
+    {
+        var instance = new T();
+        instance.Deserialize(this);
+        return instance;
+    }
+
     public void Reset(int position = 0)
     {
         _reader.SetPosition(position);

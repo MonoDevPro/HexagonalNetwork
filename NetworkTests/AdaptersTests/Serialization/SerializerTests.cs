@@ -80,7 +80,11 @@ namespace NetworkTests.AdaptersTests.Serialization
                 TestInt = 42,
                 TestBool = true,
                 TestFloat = 3.14159f,
-                TestVector = new Vector2(1.0f, 2.0f)
+                TestVector = new Vector2(1.0f, 2.0f),
+                OtherTestPacket = new OtherTestPacket
+                {
+                    Message = "Hello from OtherTestPacket!"
+                }
             };
             
             // Serializa o pacote
@@ -111,6 +115,8 @@ namespace NetworkTests.AdaptersTests.Serialization
                 Assert.That(deserializedPacket.TestFloat, Is.EqualTo(originalPacket.TestFloat), "Float values should match");
                 Assert.That(deserializedPacket.TestVector.X, Is.EqualTo(originalPacket.TestVector.X), "Vector X should match");
                 Assert.That(deserializedPacket.TestVector.Y, Is.EqualTo(originalPacket.TestVector.Y), "Vector Y should match");
+                Assert.That(deserializedPacket.OtherTestPacket, Is.Not.Null, "OtherTestPacket should not be null");
+                Assert.That(deserializedPacket.OtherTestPacket.Message, Is.EqualTo(originalPacket.OtherTestPacket.Message), "OtherTestPacket message should match");
 
                 reader.Recycle();
                 // Recycle the writer to the pool
@@ -196,6 +202,7 @@ namespace NetworkTests.AdaptersTests.Serialization
             public bool TestBool { get; set; }
             public float TestFloat { get; set; }
             public Vector2 TestVector { get; set; }
+            public OtherTestPacket OtherTestPacket { get; set; } = new();
             
             public void Serialize(INetworkWriter writer)
             {
@@ -204,6 +211,8 @@ namespace NetworkTests.AdaptersTests.Serialization
                 writer.WriteBool(TestBool);
                 writer.WriteFloat(TestFloat);
                 writer.WriteVector2(TestVector);
+
+                writer.WriteSerializable(OtherTestPacket);
             }
             
             public void Deserialize(INetworkReader reader)
@@ -213,6 +222,9 @@ namespace NetworkTests.AdaptersTests.Serialization
                 TestBool = reader.ReadBool();
                 TestFloat = reader.ReadFloat();
                 TestVector = reader.ReadVector2();
+                
+                OtherTestPacket.Deserialize(reader);
+                //OtherTestPacket = reader.ReadSerializable<OtherTestPacket>();
             }
         }
         

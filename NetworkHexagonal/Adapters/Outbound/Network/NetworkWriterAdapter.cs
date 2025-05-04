@@ -1,6 +1,7 @@
 using System.Numerics;
 using LiteNetLib.Utils;
 using NetworkHexagonal.Core.Application.Ports.Outbound;
+using NetworkHexagonal.Core.Domain.Models;
 using NetworkHexagonal.Shared.Utils;
 
 namespace NetworkHexagonal.Adapters.Outbound.Network;
@@ -53,6 +54,11 @@ public class LiteNetLibWriterAdapter : INetworkWriter
         _writer.Put(value.X);
         _writer.Put(value.Y);
         _writer.Put(value.Z);
+    }
+
+    public void WriteSerializable<T>(T value) where T : ISerializable
+    {
+        value.Serialize(this);
     }
     
     public void Reset() => _writer.Reset();

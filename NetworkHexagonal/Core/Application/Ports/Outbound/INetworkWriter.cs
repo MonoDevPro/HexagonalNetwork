@@ -1,4 +1,5 @@
 using System.Numerics;
+using NetworkHexagonal.Core.Domain.Models;
 
 namespace NetworkHexagonal.Core.Application.Ports.Outbound
 {
@@ -22,6 +23,7 @@ namespace NetworkHexagonal.Core.Application.Ports.Outbound
         void WriteBytes(byte[] value);
         void WriteVector2(Vector2 value);
         void WriteVector3(Vector3 value);
+        void WriteSerializable<T>(T value) where T : ISerializable;
 
         void Recycle();
         
