@@ -174,13 +174,18 @@ namespace NetworkTests.AdaptersTests.Serialization
         public void TestDeserializeInvalidPacketId()
         {
             // Cria um reader com um ID inválido
-            var writer = new LiteNetLib.Utils.NetDataWriter();
-            writer.Put(999999999UL); // ID que certamente não existe
-            var reader = new LiteNetLibReaderAdapter(new LiteNetLib.Utils.NetDataReader(writer.Data));
+            var writer = LiteNetLibWriterAdapter.Pool.Get();
+            writer.WriteULong(999999999UL); // ID que certamente não existe
+            var reader = LiteNetLibReaderAdapter.Pool.Get();
+            reader.SetSource(writer.Data);
+            writer.Recycle();
             
             // Tenta desserializar e espera uma exceção
             Assert.Throws<SerializationException>(() => _serializer.Deserialize(999999999UL, reader), 
                 "Should throw SerializationException for unknown packet ID");
+
+            // Recycle the reader to the pool
+            reader.Recycle();
         }
         
         // Classes para teste - corrigindo avisos de propriedades não-nulas

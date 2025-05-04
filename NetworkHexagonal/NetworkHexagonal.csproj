@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../External/LiteNetLib/LiteNetLib/LiteNetLib.csproj" />
+    <ProjectReference Include="../External/LiteNetLib/LiteNetLib/LiteNetLib.csproj" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
