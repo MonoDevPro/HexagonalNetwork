@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using NetworkHexagonal.Adapters.Outbound.Network;
 using NetworkHexagonal.Adapters.Outbound.Serialization;
+using NetworkHexagonal.Core.Application.Ports.Inbound;
 using NetworkHexagonal.Core.Application.Ports.Outbound;
 using NetworkHexagonal.Core.Application.Services;
 
@@ -22,6 +23,10 @@ namespace NetworkHexagonal.Infrastructure.DependencyInjection
             
             // Barramento de eventos
             services.AddSingleton<INetworkEventBus, NetworkEventBus>();
+
+            // Aplicações
+            services.AddSingleton<IServerNetworkApp, ServerApp>();
+            services.AddSingleton<IClientNetworkApp, ClientNetworkApp>();
             
             // Adaptadores
             services.AddSingleton<INetworkSerializer, LiteNetLibSerializerAdapter>();
@@ -31,7 +36,7 @@ namespace NetworkHexagonal.Infrastructure.DependencyInjection
             // Manipulador de pacotes
             services.AddSingleton<LiteNetLibPacketHandlerAdapter>();
             
-            // Serviços de rede
+            // Serviços de rede // Portas de entrada
             services.AddSingleton<IClientNetworkService, LiteNetLibClientAdapter>();
             services.AddSingleton<IServerNetworkService, LiteNetLibServerAdapter>();
             services.AddSingleton<IPacketSender, LiteNetLibPacketSenderAdapter>();
