@@ -2,78 +2,81 @@
 
 Este projeto implementa um módulo de networking para jogos MMO em C#, seguindo a arquitetura hexagonal (Ports & Adapters) e utilizando LiteNetLib como transporte. O objetivo é desacoplar o domínio das dependências externas, permitindo fácil extensão, testes e manutenção.
 
-## Estrutura do Projeto
+## Arquitetura Hexagonal
 
 - **Core (Domínio + Ports):**
-  - Interfaces e modelos de domínio (`INetworkConfiguration`, `IPacket`, `INetworkSerializable`, `IClientNetworkService`, `IServerNetworkService`, etc).
+  - Interfaces e modelos de domínio (ex: `INetworkConfiguration`, `IPacket`, `INetworkSerializable`, `IClientNetworkService`, `IServerNetworkService`, etc).
   - Contratos para registro, serialização e envio de pacotes.
-  - Não possui dependências externas.
+  - Não possui dependências externas ou referências a LiteNetLib.
 
 - **Adapters:**
-  - `LiteNetLibAdapter`: Implementa as interfaces do Core usando LiteNetLib, isolando a dependência.
-  - `SerializerAdapter`: Implementa serialização/deserialização desacoplada.
+  - Implementam as interfaces do Core usando LiteNetLib, isolando a dependência.
+  - Toda lógica de serialização, envio/recebimento de pacotes e callbacks de rede ficam aqui.
 
 - **Application Layer:**
-  - `ClientApp` e `ServerApp`: Orquestram o ciclo de vida de cliente e servidor, consumindo apenas interfaces do Core.
+  - `ClientNetworkApp` e `ServerNetworkApp`: Orquestram o ciclo de vida de cliente e servidor, consumindo apenas interfaces do Core.
+  - Utilizam o `NetworkEventBus` para desacoplar a propagação de eventos de rede.
 
 - **Infrastructure:**
-  - Configuração de Dependency Injection (DI) centralizada em `Infrastructure/DependencyInjection/ServiceCollectionExtensions.cs`.
+  - Configuração de Dependency Injection (DI) centralizada em `Infrastructure/DependencyInjection/NetworkServiceRegistration.cs`.
 
 - **Testes:**
-  - Testes unitários e de integração em `NetworkHexagonal.Tests`.
+  - Testes unitários e de integração em `NetworkTests/`.
 
 ## Estrutura de Pastas do Projeto
 
 ```
 NetworkHexagonal.sln
 README.md
-Infrastructure/
-    DependencyInjection/
-        ServiceCollectionExtensions.cs
 NetworkHexagonal/
-    NetworkHexagonal.csproj
-    PROJECT_STRUCTURE.md
     Adapters/
         Outbound/
-            LiteNetLibAdapter/
-                LiteNetLibAdapter.cs
-            Networking/
-                Serializer/
+            Network/
+                LiteNetLibServerAdapter.cs
+                LiteNetLibClientAdapter.cs
+                ...
+        ...
     Core/
         Application/
             Ports/
-                INetworkReader.cs
-                INetworkSerializable.cs
-                INetworkWriter.cs
-                IPacket.cs
-                Input/
-                Output/
+                Inbound/
+                Outbound/
             Services/
-                ClientApp.cs
-                ServerApp.cs
+                ClientNetworkApp.cs
+                ServerNetworkApp.cs
+                NetworkEventBus.cs
         Domain/
-            Entities/
-            Exceptions/
-            ValueObjects/
+            Events/
+                Network/
+                    ConnectionEvent.cs
+                    DisconnectionEvent.cs
+                    NetworkErrorEvent.cs
+                    ConnectionRequestEvent.cs
+            ...
     Infrastructure/
         DependencyInjection/
-            ServiceCollectionExtensions.cs
+            NetworkServiceRegistration.cs
     Shared/
         Kernel/
         Utils/
-NetworkHexagonal.Tests/
-    NetworkHexagonal.Tests.csproj
+NetworkTests/
     AdaptersTests/
-        AdaptersTests.cs
     CoreTests/
-        CoreTests.cs
+    ...
 ```
 
 - O Core contém apenas contratos, modelos e lógica de domínio.
 - Adapters isolam dependências externas.
-- Application Layer orquestra o ciclo de vida de client/server.
+- Application Layer orquestra o ciclo de vida de client/server e eventos.
 - Infrastructure centraliza DI e configurações.
 - Testes cobrem domínio, aplicação e integração real dos adapters.
+
+## NetworkEventBus
+
+O `NetworkEventBus` é um barramento de eventos in-memory utilizado para desacoplar a propagação de eventos de rede (ex: conexões, desconexões, erros) entre adapters, application e domínio.
+
+> **Atenção:**
+> O `NetworkEventBus` **não deve ser utilizado para eventos de gameplay, processamento de pacotes em alta frequência ou qualquer fluxo que exija latência mínima e throughput máximo** (ex: movimentação de jogadores, ações em tempo real). Para esses casos, utilize mecanismos diretos e otimizados, evitando overhead de abstração e casting.
 
 ## Como Usar
 
@@ -89,22 +92,30 @@ services.AddNetworkingModule();
 ### 2. Exemplo de Inicialização (Client)
 
 ```csharp
-var client = serviceProvider.GetRequiredService<IClientNetworkService>();
-client.Initialize();
-await client.ConnectAsync();
-client.Update(); // Chame periodicamente no loop principal
+var clientApp = serviceProvider.GetRequiredService<ClientNetworkApp>();
+await clientApp.ConnectAsync(serverAddress, port);
+clientApp.Update(); // Chame periodicamente no loop principal
 ```
 
 ### 3. Exemplo de Inicialização (Server)
 
 ```csharp
-var server = serviceProvider.GetRequiredService<IServerNetworkService>();
-server.Initialize();
-server.Start();
-server.Update(); // Chame periodicamente no loop principal
+var serverApp = serviceProvider.GetRequiredService<ServerNetworkApp>();
+serverApp.Start(port);
+serverApp.Update(); // Chame periodicamente no loop principal
 ```
 
-### 4. Testes
+### 4. Assinando eventos de rede
+
+```csharp
+// Exemplo: assinando eventos de conexão
+networkEventBus.Subscribe<ConnectionEvent>(evt =>
+{
+    Console.WriteLine($"Peer conectado: {evt.PeerId}");
+});
+```
+
+### 5. Testes
 
 Execute os testes com:
 
@@ -132,8 +143,6 @@ dotnet test
 Este projeto utiliza o LiteNetLib como submódulo git, localizado em `External/LiteNetLib`.
 
 ### Como clonar com submódulos
-
-Ao clonar o repositório, use:
 
 ```sh
 git clone --recurse-submodules https://github.com/MonoDevPro/HexagonalNetwork.git
@@ -166,4 +175,4 @@ git push
 
 ---
 
-Para detalhes sobre as interfaces e exemplos de pacotes, consulte o código-fonte e os testes em `NetworkHexagonal.Tests`.
+Para detalhes sobre as interfaces e exemplos de pacotes, consulte o código-fonte e os testes em `NetworkTests/`.
