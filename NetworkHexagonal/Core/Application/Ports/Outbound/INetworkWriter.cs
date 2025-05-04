@@ -22,8 +22,11 @@ namespace NetworkHexagonal.Core.Application.Ports.Outbound
         void WriteBytes(byte[] value);
         void WriteVector2(Vector2 value);
         void WriteVector3(Vector3 value);
+
+        void Recycle();
         
         void Reset();
         int Length { get; }
+        byte[] Data { get; }
     }
 }

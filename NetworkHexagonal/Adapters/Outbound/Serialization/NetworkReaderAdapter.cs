@@ -1,5 +1,6 @@
 using System.Numerics;
 using LiteNetLib.Utils;
+using NetworkHexagonal.Adapters.Outbound.Util;
 using NetworkHexagonal.Core.Application.Ports.Outbound;
 
 namespace NetworkHexagonal.Adapters.Outbound.Serialization
@@ -10,11 +11,26 @@ namespace NetworkHexagonal.Adapters.Outbound.Serialization
     public class NetworkReaderAdapter : INetworkReader
     {
         private readonly NetDataReader _reader;
+
+         public static ObjectPool<NetworkReaderAdapter> Pool { get; } = new ObjectPool<NetworkReaderAdapter>(() => new NetworkReaderAdapter(), 
+             adapter => adapter.Reset(), 5);
+        
+        public NetworkReaderAdapter()
+        {
+            _reader = new NetDataReader();
+        }
         
         public NetworkReaderAdapter(NetDataReader reader)
         {
             _reader = reader;
         }
+        
+        public NetworkReaderAdapter(byte[] data)
+        {
+            _reader = new NetDataReader(data);
+        }
+        
+        public NetDataReader Data => _reader;
         
         public byte ReadByte() => _reader.GetByte();
         public sbyte ReadSByte() => _reader.GetSByte();
@@ -36,6 +52,15 @@ namespace NetworkHexagonal.Adapters.Outbound.Serialization
         public void Reset(int position = 0)
         {
             _reader.SetPosition(position);
+        }
+
+        public void SetSource(byte[] data)
+        {
+            _reader.SetSource(data);
+        }
+        public void Recycle()
+        {
+            Pool.Return(this);
         }
         
         public int Position => _reader.Position;

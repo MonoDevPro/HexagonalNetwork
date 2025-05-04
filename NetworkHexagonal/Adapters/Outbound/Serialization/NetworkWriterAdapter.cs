@@ -1,5 +1,6 @@
 using System.Numerics;
 using LiteNetLib.Utils;
+using NetworkHexagonal.Adapters.Outbound.Util;
 using NetworkHexagonal.Core.Application.Ports.Outbound;
 
 namespace NetworkHexagonal.Adapters.Outbound.Serialization
@@ -10,11 +11,22 @@ namespace NetworkHexagonal.Adapters.Outbound.Serialization
     public class NetworkWriterAdapter : INetworkWriter
     {
         private readonly NetDataWriter _writer;
+
+        public static ObjectPool<NetworkWriterAdapter> Pool { get; } 
+            = new ObjectPool<NetworkWriterAdapter>(() => new NetworkWriterAdapter(), 
+            adapter => adapter.Reset(), 5);
         
+        public NetworkWriterAdapter()
+        {
+            _writer = new NetDataWriter();
+        }
+
         public NetworkWriterAdapter(NetDataWriter writer)
         {
             _writer = writer;
         }
+
+        public byte[] Data => _writer.Data;
         
         public void WriteByte(byte value) => _writer.Put(value);
         public void WriteSByte(sbyte value) => _writer.Put(value);
@@ -44,7 +56,12 @@ namespace NetworkHexagonal.Adapters.Outbound.Serialization
         }
         
         public void Reset() => _writer.Reset();
-        
+
+        public void Recycle()
+        {
+            Pool.Return(this);
+        }
+
         public int Length => _writer.Length;
     }
 }
