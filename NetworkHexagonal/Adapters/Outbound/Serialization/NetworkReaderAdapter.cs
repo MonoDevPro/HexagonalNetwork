@@ -1,7 +1,7 @@
 using System.Numerics;
 using LiteNetLib.Utils;
-using NetworkHexagonal.Adapters.Outbound.Util;
 using NetworkHexagonal.Core.Application.Ports.Outbound;
+using NetworkHexagonal.Shared.Utils;
 
 namespace NetworkHexagonal.Adapters.Outbound.Serialization
 {

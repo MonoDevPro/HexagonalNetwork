@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 
-namespace NetworkHexagonal.Adapters.Outbound.Util;
+namespace NetworkHexagonal.Shared.Utils;
 
 /// <summary>
 /// Um pool genérico de objetos reutilizáveis para reduzir a pressão no Garbage Collector
