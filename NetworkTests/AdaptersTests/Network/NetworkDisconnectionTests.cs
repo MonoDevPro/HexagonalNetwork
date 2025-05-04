@@ -7,6 +7,8 @@ using NetworkHexagonal.Core.Application.Ports.Outbound;
 using NetworkHexagonal.Core.Domain.Events;
 using NetworkHexagonal.Core.Domain.Models;
 using NetworkHexagonal.Infrastructure.DependencyInjection;
+using NetworkHexagonal.Core.Application.Ports.Inbound;
+using NetworkHexagonal.Core.Domain.Events.Network;
 
 namespace NetworkTests.AdaptersTests.Network
 {
@@ -18,6 +20,7 @@ namespace NetworkTests.AdaptersTests.Network
         private IClientNetworkService _clientService;
         private IPacketRegistry _packetRegistry;
         private IPacketSender _packetSender;
+        private INetworkEventBus _eventBus;
         
         private TaskCompletionSource<bool> _clientDisconnectedTcs;
         private TaskCompletionSource<bool> _serverDetectedDisconnectTcs;
@@ -51,6 +54,7 @@ namespace NetworkTests.AdaptersTests.Network
             _clientService = _serviceProvider.GetRequiredService<IClientNetworkService>();
             _packetRegistry = _serviceProvider.GetRequiredService<IPacketRegistry>();
             _packetSender = _serviceProvider.GetRequiredService<IPacketSender>();
+            _eventBus = _serviceProvider.GetRequiredService<INetworkEventBus>();
             
             // Configura event sources para testes assíncronos
             _clientDisconnectedTcs = new TaskCompletionSource<bool>();
@@ -79,24 +83,18 @@ namespace NetworkTests.AdaptersTests.Network
             
             // Armazena o ID do cliente conectado
             int connectedPeerId = -1;
-            
-            // Configura handlers para o evento de conexão do servidor
-            _serverService.OnPeerConnected += (ConnectionEvent e) => {
+
+            // Configura handlers para o evento de conexão do cliente
+            _eventBus.Subscribe<ConnectionEvent>(e => {
                 connectedPeerId = e.PeerId;
-                Console.WriteLine($"Cliente conectado ao servidor com ID: {e.PeerId}");
-            };
-            
-            // Configura handler para evento de desconexão do cliente
-            _clientService.OnDisconnected += (DisconnectionEvent e) => {
-                Console.WriteLine($"Cliente detectou desconexão. Razão: {e.Reason}");
+                Console.WriteLine($"Conexão. ID: {e.PeerId}");
+            });
+
+            _eventBus.Subscribe<DisconnectionEvent>(e => {
+                Console.WriteLine($"Desconexão. ID: {e.PeerId}. Razão: {e.Reason}");
                 _clientDisconnectedTcs.TrySetResult(true);
-            };
-            
-            // Configura handler para evento de desconexão do servidor
-            _serverService.OnPeerDisconnected += (DisconnectionEvent e) => {
-                Console.WriteLine($"Servidor detectou desconexão do peer {e.PeerId}. Razão: {e.Reason}");
                 _serverDetectedDisconnectTcs.TrySetResult(true);
-            };
+            });
             
             // Conecta o cliente
             var result = await _clientService.ConnectAsync("localhost", 9051);

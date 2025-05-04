@@ -5,7 +5,7 @@ Este projeto implementa um módulo de networking para jogos MMO em C#, seguindo 
 ## Estrutura do Projeto
 
 - **Core (Domínio + Ports):**
-  - Interfaces e modelos de domínio (`INetworkConfiguration`, `IPacket`, `INetworkSerializable`, `INetworkService`, etc).
+  - Interfaces e modelos de domínio (`INetworkConfiguration`, `IPacket`, `INetworkSerializable`, `IClientNetworkService`, `IServerNetworkService`, etc).
   - Contratos para registro, serialização e envio de pacotes.
   - Não possui dependências externas.
 

@@ -7,6 +7,8 @@ using NetworkHexagonal.Core.Application.Ports.Outbound;
 using NetworkHexagonal.Core.Domain.Events;
 using NetworkHexagonal.Core.Domain.Models;
 using NetworkHexagonal.Infrastructure.DependencyInjection;
+using NetworkHexagonal.Core.Application.Ports.Inbound;
+using NetworkHexagonal.Core.Domain.Events.Network;
 
 namespace NetworkTests.AdaptersTests.Network
 {
@@ -18,6 +20,7 @@ namespace NetworkTests.AdaptersTests.Network
         private IClientNetworkService _clientService;
         private IPacketRegistry _packetRegistry;
         private IPacketSender _packetSender;
+        private INetworkEventBus _eventBus;
         
         private TaskCompletionSource<bool> _serverReceivedPacket;
         private TaskCompletionSource<bool> _clientReceivedPacket;
@@ -51,6 +54,7 @@ namespace NetworkTests.AdaptersTests.Network
             _clientService = _serviceProvider.GetRequiredService<IClientNetworkService>();
             _packetRegistry = _serviceProvider.GetRequiredService<IPacketRegistry>();
             _packetSender = _serviceProvider.GetRequiredService<IPacketSender>();
+            _eventBus = _serviceProvider.GetRequiredService<INetworkEventBus>();
             
             // Configura event sources para testes assíncronos
             _serverReceivedPacket = new TaskCompletionSource<bool>();
@@ -78,11 +82,11 @@ namespace NetworkTests.AdaptersTests.Network
             NUnit.Framework.Assert.That(serverStarted, Is.True, "Server should start successfully");
             
             int connectedPeerId = -1;
-            
+
             // Configura handlers de eventos
-            _serverService.OnPeerConnected += (ConnectionEvent e) => {
+            _eventBus.Subscribe<ConnectionEvent>(e => {
                 connectedPeerId = e.PeerId;
-            };
+            });
             
             // Registra manipuladores de pacotes
             _packetRegistry.RegisterHandler<TestPacket>((packet, context) => {

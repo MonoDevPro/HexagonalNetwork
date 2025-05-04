@@ -3,8 +3,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NetworkHexagonal.Core.Application.Ports.Inbound;
 using NetworkHexagonal.Core.Application.Ports.Outbound;
 using NetworkHexagonal.Core.Domain.Events;
+using NetworkHexagonal.Core.Domain.Events.Network;
 using NetworkHexagonal.Core.Domain.Models;
 using NetworkHexagonal.Infrastructure.DependencyInjection;
 
@@ -105,6 +107,7 @@ namespace NetworkTests.Console
         {
             var serverService = serviceProvider.GetRequiredService<IServerNetworkService>();
             var packetSender = serviceProvider.GetRequiredService<IPacketSender>();
+            var eventBus = serviceProvider.GetRequiredService<INetworkEventBus>();
             
             System.Console.WriteLine($"Iniciando servidor na porta {port}...");
             if (!serverService.Start(port))
@@ -120,16 +123,17 @@ namespace NetworkTests.Console
             var connectedPeers = new System.Collections.Generic.HashSet<int>();
             
             // Configura manipuladores de eventos
-            serverService.OnPeerConnected += e => {
+
+            eventBus.Subscribe<ConnectionEvent>(e => {
                 connectedPeers.Add(e.PeerId);
                 System.Console.WriteLine($"Cliente conectado: {e.PeerId}");
-                
+
                 // Envia mensagem de boas-vindas
                 packetSender.SendPacket(e.PeerId, new ChatMessage { 
                     Sender = "Servidor", 
                     Message = "Bem-vindo ao chat!" 
                 });
-                
+
                 // Notifica outros clientes
                 foreach (var peerId in connectedPeers)
                 {
@@ -141,9 +145,9 @@ namespace NetworkTests.Console
                         });
                     }
                 }
-            };
-            
-            serverService.OnPeerDisconnected += e => {
+            });
+
+            eventBus.Subscribe<DisconnectionEvent>(e => {
                 connectedPeers.Remove(e.PeerId);
                 System.Console.WriteLine($"Cliente desconectado: {e.PeerId}");
                 
@@ -155,7 +159,7 @@ namespace NetworkTests.Console
                         Message = $"Usuário {e.PeerId} saiu do chat" 
                     });
                 }
-            };
+            });
             
             // Executa atualizações de rede em loop
             var cancellationTokenSource = new CancellationTokenSource();
@@ -205,6 +209,7 @@ namespace NetworkTests.Console
         {
             var clientService = serviceProvider.GetRequiredService<IClientNetworkService>();
             var packetSender = serviceProvider.GetRequiredService<IPacketSender>();
+            var eventBus = serviceProvider.GetRequiredService<INetworkEventBus>();
             
             System.Console.WriteLine($"Conectando ao servidor {address}:{port}...");
             
@@ -224,12 +229,12 @@ namespace NetworkTests.Console
                 e.Cancel = true;
                 cancellationTokenSource.Cancel();
             };
-            
-            // Configura eventos
-            clientService.OnDisconnected += e => {
+
+            // Configura manipuladores de eventos
+            eventBus.Subscribe<DisconnectionEvent>(e => {
                 System.Console.WriteLine($"Desconectado do servidor: {e.Reason}");
                 cancellationTokenSource.Cancel();
-            };
+            });
             
             // Thread para ler entrada do usuário e enviar para o servidor
             _ = Task.Run(() => {
