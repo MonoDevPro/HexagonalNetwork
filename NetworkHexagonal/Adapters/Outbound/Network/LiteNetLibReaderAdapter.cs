@@ -14,7 +14,7 @@ public class LiteNetLibReaderAdapter : INetworkReader
     private readonly NetDataReader _reader;
 
      public static ObjectPool<LiteNetLibReaderAdapter> Pool { get; } = new ObjectPool<LiteNetLibReaderAdapter>(() => new LiteNetLibReaderAdapter(), 
-         adapter => adapter.Reset(), 5);
+         adapter => adapter.ResetPosition(), 5);
     
     public LiteNetLibReaderAdapter()
     {
@@ -57,7 +57,7 @@ public class LiteNetLibReaderAdapter : INetworkReader
         return instance;
     }
 
-    public void Reset(int position = 0)
+    public void ResetPosition(int position = 0)
     {
         _reader.SetPosition(position);
     }

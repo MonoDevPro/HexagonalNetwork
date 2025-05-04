@@ -34,7 +34,7 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
                 // Obtém o ID do pacote do cabeçalho
                 var networkReader = LiteNetLibReaderAdapter.Pool.Get();
                 networkReader.SetSource(reader.RawData);
-                networkReader.Reset(reader.Position);
+                networkReader.ResetPosition(reader.Position);
                 var packetId = networkReader.ReadULong();
                 
                 // Cria contexto do pacote

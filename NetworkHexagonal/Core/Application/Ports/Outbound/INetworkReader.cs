@@ -25,7 +25,7 @@ namespace NetworkHexagonal.Core.Application.Ports.Outbound
         Vector3 ReadVector3();
         T ReadSerializable<T>() where T : ISerializable, new();
         
-        void Reset(int position = 0);
+        void ResetPosition(int position = 0);
         int Position { get; }
         int Available { get; }
     }
