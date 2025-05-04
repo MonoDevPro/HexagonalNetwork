@@ -15,5 +15,14 @@ Obrigado por considerar contribuir com o NetworkHexagonal!
 - Prefira commits pequenos e descritivos
 - Atualize a documentação se necessário
 
+## Arquitetura e Padrões
+- Siga rigorosamente a arquitetura hexagonal:
+  - O Core (domínio) não deve depender de adapters, infrastructure ou bibliotecas externas.
+  - Toda lógica de LiteNetLib e dependências externas deve estar isolada nos adapters.
+  - Use o NetworkEventBus apenas para eventos administrativos (conexão, desconexão, erro), nunca para fluxos críticos de gameplay.
+  - Adapters não devem expor eventos públicos, apenas publicar eventos no barramento.
+- Ao criar ou modificar eventos, siga o padrão de publicação/assinatura via NetworkEventBus.
+- Sempre atualize a documentação e os testes ao alterar fluxos de eventos, arquitetura ou interfaces.
+
 ## Dúvidas
 Abra uma issue para discutir qualquer dúvida ou sugestão antes de começar grandes mudanças.
