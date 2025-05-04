@@ -1,6 +1,5 @@
 using LiteNetLib;
 using Microsoft.Extensions.Logging;
-using NetworkHexagonal.Adapters.Outbound.Serialization;
 using NetworkHexagonal.Core.Application.Ports.Outbound;
 using NetworkHexagonal.Core.Domain.Events.Network;
 using NetworkHexagonal.Core.Domain.Models;
@@ -34,7 +33,7 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
             {
                 // Obtém o ID do pacote do cabeçalho
                 
-                var networkReader = NetworkReaderAdapter.Pool.Get();
+                var networkReader = LiteNetLibReaderAdapter.Pool.Get();
                 networkReader.SetSource(reader.RawData);
                 networkReader.Reset(reader.Position);
                 var packetId = networkReader.ReadULong();

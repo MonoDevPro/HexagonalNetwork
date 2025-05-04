@@ -8,6 +8,7 @@ using NetworkHexagonal.Core.Domain.Exceptions;
 using NetworkHexagonal.Core.Domain.Models;
 using NetworkHexagonal.Infrastructure.DependencyInjection;
 using NetworkHexagonal.Adapters.Outbound.Serialization;
+using NetworkHexagonal.Adapters.Outbound.Network;
 
 namespace NetworkTests.AdaptersTests.Serialization
 {
@@ -28,7 +29,7 @@ namespace NetworkTests.AdaptersTests.Serialization
             });
             
             // Adiciona serviços
-            services.AddSingleton<INetworkSerializer, LiteNetLibSerializerAdapter>();
+            services.AddSingleton<INetworkSerializer, SerializerAdapter>();
             
             _serviceProvider = services.BuildServiceProvider();
             
@@ -91,7 +92,7 @@ namespace NetworkTests.AdaptersTests.Serialization
             // Verifica se writer não é nulo antes de acessar (corrigir warning CS8602)
             if (serializedWriter != null)
             {
-                var reader = NetworkReaderAdapter.Pool.Get();
+                var reader = LiteNetLibReaderAdapter.Pool.Get();
                 reader.SetSource(serializedWriter.Data);
                 
                 // Lê o ID do pacote
@@ -140,7 +141,7 @@ namespace NetworkTests.AdaptersTests.Serialization
             // Verifica se writer não é nulo antes de acessar (corrigir warning CS8602)
             if (serializedWriter != null)
             {
-                var reader = NetworkReaderAdapter.Pool.Get();
+                var reader = LiteNetLibReaderAdapter.Pool.Get();
                 reader.SetSource(serializedWriter.Data);
                 
                 // Lê o ID do pacote
@@ -175,7 +176,7 @@ namespace NetworkTests.AdaptersTests.Serialization
             // Cria um reader com um ID inválido
             var writer = new LiteNetLib.Utils.NetDataWriter();
             writer.Put(999999999UL); // ID que certamente não existe
-            var reader = new NetworkReaderAdapter(new LiteNetLib.Utils.NetDataReader(writer.Data));
+            var reader = new LiteNetLibReaderAdapter(new LiteNetLib.Utils.NetDataReader(writer.Data));
             
             // Tenta desserializar e espera uma exceção
             Assert.Throws<SerializationException>(() => _serializer.Deserialize(999999999UL, reader), 

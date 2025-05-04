@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using NetworkHexagonal.Adapters.Outbound.Network;
 using NetworkHexagonal.Core.Application.Ports.Outbound;
 using NetworkHexagonal.Core.Domain.Exceptions;
 using NetworkHexagonal.Core.Domain.Models;
@@ -8,13 +9,13 @@ namespace NetworkHexagonal.Adapters.Outbound.Serialization
     /// <summary>
     /// Adaptador de serialização usando LiteNetLib
     /// </summary>
-    public class LiteNetLibSerializerAdapter : INetworkSerializer
+    public class SerializerAdapter : INetworkSerializer
     {
-        private readonly ILogger<LiteNetLibSerializerAdapter> _logger;
+        private readonly ILogger<SerializerAdapter> _logger;
         private readonly Dictionary<Type, ulong> _packetIdRegistry = new();
         private readonly Dictionary<ulong, Type> _packetTypeRegistry = new();
         
-        public LiteNetLibSerializerAdapter(ILogger<LiteNetLibSerializerAdapter> logger)
+        public SerializerAdapter(ILogger<SerializerAdapter> logger)
         {
             _logger = logger;
         }
@@ -56,7 +57,7 @@ namespace NetworkHexagonal.Adapters.Outbound.Serialization
         {
             try
             {
-                var writerAdapter = NetworkWriterAdapter.Pool.Get();
+                var writerAdapter = LiteNetLibWriterAdapter.Pool.Get();
                 var packetId = GetPacketId<T>();
                 writerAdapter.WriteULong(packetId);
                 SerializePacket(packet, writerAdapter); // Usa o adaptador diretamente

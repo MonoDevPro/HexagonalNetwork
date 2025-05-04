@@ -29,7 +29,7 @@ namespace NetworkHexagonal.Infrastructure.DependencyInjection
             services.AddSingleton<IClientNetworkApp, ClientNetworkApp>();
             
             // Adaptadores
-            services.AddSingleton<INetworkSerializer, LiteNetLibSerializerAdapter>();
+            services.AddSingleton<INetworkSerializer, SerializerAdapter>();
             services.AddSingleton<LiteNetLibConnectionManagerAdapter>();
             services.AddSingleton<IConnectionManager>(sp => sp.GetRequiredService<LiteNetLibConnectionManagerAdapter>());
             
