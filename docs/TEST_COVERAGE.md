@@ -28,7 +28,7 @@ Baseado no último relatório de cobertura (gerado em 02/05/2025):
 | LiteNetLibConnectionManagerAdapter | 82,14% | Bem coberto |
 | NetworkReaderAdapter | 41,65% | Cobertura parcial |
 | NetworkWriterAdapter | 42,85% | Cobertura parcial |
-| ClientApp/ServerApp | Baixa cobertura | Requer mais testes |
+| ClientNetworkApp/ServerNetworkApp | Média | Orquestração e integração testadas |
 
 ## Testes Implementados
 
@@ -44,8 +44,9 @@ Baseado no último relatório de cobertura (gerado em 02/05/2025):
 - **NetworkDisconnectionTests**: Testa cenários de desconexão e reconexão
 - **SerializerTests**: Testa serialização e deserialização de diferentes tipos de dados
 
-### Testes de Aplicação
-- **NetworkEventBusTests**: Verifica o funcionamento do sistema de eventos de rede
+### Testes de Application e Eventos
+- **NetworkEventBusTests**: Verifica o funcionamento do sistema de eventos de rede, publicação e assinatura
+- **ClientNetworkApp/ServerNetworkAppTests**: Testam a orquestração de ciclo de vida e integração com o barramento de eventos
 
 ## Lacunas de Testes
 
@@ -53,7 +54,7 @@ As seguintes áreas precisam de cobertura adicional:
 
 1. **Teste de Falhas**: Simulação de falhas de rede, perda de pacotes e alta latência
 2. **Teste de Carga**: Comportamento sob alta carga (muitas conexões e pacotes)
-3. **Teste de Aplicação**: Melhorar a cobertura das classes ClientApp e ServerApp
+3. **Teste de Application**: Melhorar a cobertura das classes ClientNetworkApp e ServerNetworkApp, especialmente integração com eventos
 4. **Serialização Avançada**: Cobertura mais ampla para casos de serialização complexos
 5. **Utilidades**: Melhorar cobertura de classes utilitárias (ObjectPool, FastBitConverter)
 
@@ -65,6 +66,7 @@ Para melhorar a cobertura de testes, as seguintes ações são recomendadas:
 2. **Melhorar Infra de Testes**: Implementar mocks e fixtures para facilitar testes
 3. **Testes de Regressão**: Garantir que novos recursos não quebrem funcionalidades existentes
 4. **Testes de Desempenho**: Avaliar o desempenho sob diferentes cargas de trabalho
+5. **Testes de Eventos**: Garantir que todos os fluxos de publicação e assinatura do NetworkEventBus estejam cobertos
 
 ## Execução dos Testes
 
