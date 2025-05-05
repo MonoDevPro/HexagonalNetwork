@@ -9,23 +9,26 @@ public class ServerApp : IServerNetworkApp
 {
     private readonly IServerNetworkService _serverNetworkService;
 
-    public INetworkEventBus EventBus { get; }
+    public INetworkConfiguration Configuration { get; }
+    public IConnectionManager ConnectionManager { get; }
     public IPacketSender PacketSender { get; }
     public IPacketRegistry PacketRegistry { get;}
-    public INetworkConfiguration Configuration { get; }
+    public INetworkEventBus EventBus { get; }
 
     public ServerApp(
         IServerNetworkService networkService,
+        INetworkConfiguration config,
+        IConnectionManager connectionManager,
         IPacketSender packetSender,
         IPacketRegistry packetRegistry,
-        INetworkConfiguration config,
         INetworkEventBus eventBus)
     {
         _serverNetworkService = networkService;
-        EventBus = eventBus;
+        Configuration = config;
+        ConnectionManager = connectionManager;
         PacketSender = packetSender;
         PacketRegistry = packetRegistry;
-        Configuration = config;
+        EventBus = eventBus;
 
         EventBus.Subscribe<ConnectionRequestEvent>(ProcessConnectionRequest);
     }

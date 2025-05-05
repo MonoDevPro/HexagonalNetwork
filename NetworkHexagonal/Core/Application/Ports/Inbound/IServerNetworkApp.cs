@@ -5,10 +5,11 @@ namespace NetworkHexagonal.Core.Application.Ports.Inbound;
 
 public interface IServerNetworkApp
 {
-    INetworkEventBus EventBus { get; }
+    INetworkConfiguration Configuration { get; }
+    IConnectionManager ConnectionManager { get; }
     IPacketSender PacketSender { get; }
     IPacketRegistry PacketRegistry { get; }
-    INetworkConfiguration Configuration { get; }
+    INetworkEventBus EventBus { get; }
     void Initialize();
     bool Start(int port);
     void Stop();

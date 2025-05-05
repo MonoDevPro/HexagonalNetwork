@@ -75,5 +75,18 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
         {
             return _peers.Count;
         }
+
+        public bool IsPeerConnected(int peerId)
+        {
+            if (_peers.TryGetValue(peerId, out var peer))
+            {
+                return peer.ConnectionState == ConnectionState.Connected;
+            }
+            else
+            {
+                _logger.LogWarning("Tentativa de verificar conexão de peer inexistente: {PeerId}", peerId);
+                return false;
+            }
+        }
     }
 }
