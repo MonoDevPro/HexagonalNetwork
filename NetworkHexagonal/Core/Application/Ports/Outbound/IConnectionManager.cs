@@ -1,4 +1,6 @@
 
+using NetworkHexagonal.Core.Domain.Events.Network;
+
 namespace NetworkHexagonal.Core.Application.Ports.Outbound;
 
 /// <summary>
@@ -6,6 +8,8 @@ namespace NetworkHexagonal.Core.Application.Ports.Outbound;
 /// </summary>
 public interface IConnectionManager
 {
+    event Action<ConnectionLatencyEvent>? ConnectionLatencyEvent;
+    
     /// <summary>
     /// Obtém o número de conexões ativas
     /// </summary>

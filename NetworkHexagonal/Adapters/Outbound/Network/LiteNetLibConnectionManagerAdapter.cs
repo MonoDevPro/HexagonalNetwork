@@ -4,6 +4,7 @@ using System.Linq;
 using LiteNetLib;
 using Microsoft.Extensions.Logging;
 using NetworkHexagonal.Core.Application.Ports.Outbound;
+using NetworkHexagonal.Core.Domain.Events.Network;
 
 namespace NetworkHexagonal.Adapters.Outbound.Network
 {
@@ -14,6 +15,12 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
     {
         private readonly Dictionary<int, NetPeer> _peers = new();
         private readonly ILogger<LiteNetLibConnectionManagerAdapter> _logger;
+        
+        public event Action<ConnectionLatencyEvent>? ConnectionLatencyEvent;
+        public void OnConnectionLatencyEvent(NetPeer peer, int latency)
+        {
+            ConnectionLatencyEvent?.Invoke(new ConnectionLatencyEvent(peer.Id, latency));
+        }
         
         public LiteNetLibConnectionManagerAdapter(ILogger<LiteNetLibConnectionManagerAdapter> logger)
         {

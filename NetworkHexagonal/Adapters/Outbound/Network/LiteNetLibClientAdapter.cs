@@ -158,6 +158,8 @@ namespace NetworkHexagonal.Adapters.Outbound.Network
                 _eventBus.Publish(new NetworkErrorEvent($"Erro de rede: {error} de {endPoint}"));
             };
             
+            _listener.NetworkLatencyUpdateEvent += _connectionManager.OnConnectionLatencyEvent;
+            
             _listener.NetworkReceiveEvent += _packetHandler.HandleNetworkReceive;
         }
         
