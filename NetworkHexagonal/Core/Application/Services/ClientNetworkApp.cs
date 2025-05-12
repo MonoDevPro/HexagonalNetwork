@@ -6,15 +6,17 @@ namespace NetworkHexagonal.Core.Application.Services;
 
 public class ClientNetworkApp : IClientNetworkApp
 {
-    private readonly IClientNetworkService _clientNetworkService;
     public INetworkEventBus EventBus { get; }
     public IPacketSender PacketSender { get; }
+    public IConnectionManager ConnectionManager { get; }
     public IPacketRegistry PacketRegistry { get;}
     public INetworkConfiguration Configuration { get; }
+    private readonly IClientNetworkService _clientNetworkService;
 
     public ClientNetworkApp(
         IClientNetworkService networkService,
         IPacketSender packetSender,
+        IConnectionManager connectionManager,
         IPacketRegistry packetRegistry,
         INetworkConfiguration config,
         INetworkEventBus eventBus)
@@ -22,6 +24,7 @@ public class ClientNetworkApp : IClientNetworkApp
         _clientNetworkService = networkService;
         EventBus = eventBus;
         PacketSender = packetSender;
+        ConnectionManager = connectionManager;
         PacketRegistry = packetRegistry;
         Configuration = config;
         // Eventos do adapter removidos: publicação agora é feita diretamente no adapter via NetworkEventBus.

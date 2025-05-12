@@ -8,6 +8,7 @@ public interface IClientNetworkApp
 {
     INetworkEventBus EventBus { get; }
     IPacketSender PacketSender { get; }
+    public IConnectionManager ConnectionManager { get; }
     IPacketRegistry PacketRegistry { get; }
     INetworkConfiguration Configuration { get; }
     void Initialize();
