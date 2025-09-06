@@ -120,8 +120,11 @@ public class ConsoleChatManager : IOrderedInitializable, IOrderedUpdatable
 
     private void HandleClientDisconnection(DisconnectionEvent e)
     {
-        System.Console.WriteLine($"Desconectado do servidor: {e.Reason}. Pressione Ctrl+C para sair.");
-        _cts.Cancel(); // Para o leitor de input
+        System.Console.ForegroundColor = ConsoleColor.Red;
+        System.Console.WriteLine($"Desconectado do servidor. Motivo: {e.Reason}. Tentando reconectar...");
+        System.Console.ResetColor();
+        // A lógica de reconexão será tratada pela ClientNetworkApp.
+        // Não devemos cancelar o loop principal aqui.
     }
     #endregion
 
