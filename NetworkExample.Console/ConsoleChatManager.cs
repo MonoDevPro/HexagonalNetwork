@@ -129,21 +129,31 @@ public class ConsoleChatManager : IOrderedInitializable, IOrderedUpdatable
     #endregion
 
     // Este método agora roda em uma thread separada.
-    private void ReadInputLoop(CancellationToken token)
+    private async Task ReadInputLoop(CancellationToken token)
     {
         while (!token.IsCancellationRequested)
         {
             try
             {
-                // Esta chamada bloqueante agora não afeta o loop principal.
-                var input = System.Console.ReadLine();
+                // Usa ReadLineAsync que respeita o cancellation token.
+                // A tarefa será cancelada quando o token for acionado via Ctrl+C.
+                var input = await System.Console.In.ReadLineAsync(token);
                 if (input != null)
                 {
                     _inputQueue.Enqueue(input);
                 }
             }
-            catch (IOException) { break; } // Console fechado
-            catch (OperationCanceledException) { break; } // Esperado ao encerrar
+            catch (OperationCanceledException) 
+            {
+                // Esta é a exceção esperada quando Ctrl+C é pressionado.
+                // O loop será encerrado corretamente.
+                break; 
+            }
+            catch (IOException) 
+            { 
+                // O console pode ter sido fechado de forma abrupta.
+                break; 
+            }
         }
     }
 

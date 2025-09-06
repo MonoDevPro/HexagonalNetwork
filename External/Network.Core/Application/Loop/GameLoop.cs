@@ -68,7 +68,7 @@ public sealed class GameLoop : IAsyncDisposable
             try
             {
                 _logger.LogDebug("Initializing {TypeName} (Order: {Order})...", init.GetType().Name, init.Order);
-                await init.InitializeAsync(cancellationToken);
+                await init.InitializeAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
