@@ -1,3 +1,4 @@
+using Network.Core.Application.Loop;
 using Network.Core.Application.Options;
 using Network.Core.Application.Ports.Inbound;
 using Network.Core.Application.Ports.Outbound;
@@ -5,7 +6,7 @@ using Network.Core.Domain.Events;
 
 namespace Network.Core.Application.Services;
 
-public class ServerApp : IServerNetworkApp
+public class ServerApp : IServerNetworkApp, IOrderedUpdatableAsync
 {
     private readonly IServerNetworkService _serverNetworkService;
 
@@ -14,6 +15,9 @@ public class ServerApp : IServerNetworkApp
     public IPacketSender PacketSender { get; }
     public IPacketRegistry PacketRegistry { get;}
     public INetworkEventBus EventBus { get; }
+    
+    // Async update support
+    public int Order => 100; // Network operations should happen early in the update cycle
 
     public ServerApp(
         IServerNetworkService networkService,
@@ -66,6 +70,12 @@ public class ServerApp : IServerNetworkApp
     public void Update(float deltaTime)
     {
         _serverNetworkService.Update();
+    }
+
+    public async Task UpdateAsync(float deltaTime, CancellationToken cancellationToken = default)
+    {
+        // Perform non-blocking network operations
+        await Task.Run(() => _serverNetworkService.Update(), cancellationToken);
     }
 
     public void DisconnectPeer(int peerId)
