@@ -3,7 +3,7 @@ using Network.Core.Application.Ports.Inbound;
 
 namespace Network.Adapters.Loop;
 
-public class NetworkLoopAdapter(IClientNetworkApp? clientNetworkApp, IServerNetworkApp? serverNetworkApp) : IOrderedInitializable, IOrderedUpdatable
+public class NetworkLoopAdapter(IClientNetworkApp? clientNetworkApp = null, IServerNetworkApp? serverNetworkApp = null) : IOrderedInitializable, IOrderedUpdatable
 {
     public int Order { get; } = 0;
     

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Network.Adapters;
 using Network.Core.Application.Loop;
 using Network.Core.Application.Options;
@@ -22,6 +23,8 @@ public class Program
             System.Console.WriteLine("Uso: dotnet run -- [server|client]");
             return;
         }
+        
+        bool isServer = args[0].ToLower() == "server";
 
         string mode = args[0].ToLower();
         
@@ -38,7 +41,10 @@ public class Program
         services.AddSingleton(configuration);
 
         services.Configure<NetworkOptions>(configuration.GetSection(NetworkOptions.SectionName));
+        services.AddSingleton<NetworkOptions>(sp => sp.GetRequiredService<IOptions<NetworkOptions>>().Value);
+        
         services.Configure<LoopOptions>(configuration.GetSection(LoopOptions.SectionName));
+        services.AddSingleton<LoopOptions>(sp => sp.GetRequiredService<IOptions<LoopOptions>>().Value);
 
         services.AddLogging(builder =>
         {
@@ -47,8 +53,11 @@ public class Program
         });
 
         // Registra serviços de rede e o GameLoop
-        services.AddClientNetworking();
-        services.AddServerNetworking();
+        if (isServer)
+            services.AddServerNetworking();
+        else
+            services.AddClientNetworking();
+        
         services.AddGameLoopIntegration(); // Assume que este método registra o Loop e o HostedService (se houver)
 
         // Registra nosso novo gerenciador de chat e input

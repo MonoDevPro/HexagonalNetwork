@@ -52,11 +52,11 @@ public static class ServiceRegistration
     
     public static IServiceCollection AddGameLoopIntegration(this IServiceCollection services)
     {
-        services.TryAddSingleton<GameLoop>();
+        services.AddSingleton<GameLoop>();
         
         services.AddSingleton<NetworkLoopAdapter>();
-        services.AddSingleton<IOrderedInitializable>(sp => sp.GetRequiredService<NetworkLoopAdapter>());
-        services.AddSingleton<IOrderedUpdatable>(sp => sp.GetRequiredService<NetworkLoopAdapter>());
+        services.AddSingleton<IInitializable>(sp => sp.GetRequiredService<NetworkLoopAdapter>());
+        services.AddSingleton<IUpdatable>(sp => sp.GetRequiredService<NetworkLoopAdapter>());
         
         return services;
     }
