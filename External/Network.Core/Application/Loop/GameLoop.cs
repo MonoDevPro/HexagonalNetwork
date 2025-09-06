@@ -19,6 +19,7 @@ public sealed class GameLoop : IAsyncDisposable
 
     private readonly IOrderedInitializable[] _initializables;
     private readonly IOrderedUpdatable[] _updatables;
+    private readonly IOrderedUpdatableAsync[] _asyncUpdatables;
     private readonly PerformanceMonitor? _performanceMonitor;
 
     // ... (Delegates de logging permanecem os mesmos, estão excelentes) ...
@@ -53,11 +54,17 @@ public sealed class GameLoop : IAsyncDisposable
             .OfType<IOrderedUpdatable>()
             .OrderBy(s => s.Order)
             .ToArray();
+            
+        _asyncUpdatables = allUpdatables
+            .OfType<IOrderedUpdatableAsync>()
+            .OrderBy(s => s.Order)
+            .ToArray();
 
         _performanceMonitor = performanceMonitor;
 
-        _logger.LogInformation("Game Loop configured for {TicksPerSecond} TPS ({TickSeconds:F4}s per tick)",
-            loopOptions.TicksPerSecond, _tickSeconds);
+        _logger.LogInformation("Game Loop configured for {TicksPerSecond} TPS ({TickSeconds:F4}s per tick). " +
+            "Sync updatables: {SyncCount}, Async updatables: {AsyncCount}",
+            loopOptions.TicksPerSecond, _tickSeconds, _updatables.Length, _asyncUpdatables.Length);
     }
 
     public async Task RunAsync(CancellationToken cancellationToken)
@@ -103,8 +110,19 @@ public sealed class GameLoop : IAsyncDisposable
                     sw.Restart();
                     try
                     {
+                        // Execute synchronous updates first
                         for (var i = 0; i < _updatables.Length; i++)
                             _updatables[i].Update((float)_tickSeconds);
+                            
+                        // Execute asynchronous updates concurrently
+                        if (_asyncUpdatables.Length > 0)
+                        {
+                            var asyncTasks = new Task[_asyncUpdatables.Length];
+                            for (var i = 0; i < _asyncUpdatables.Length; i++)
+                                asyncTasks[i] = _asyncUpdatables[i].UpdateAsync((float)_tickSeconds, cancellationToken);
+                                
+                            await Task.WhenAll(asyncTasks).ConfigureAwait(false);
+                        }
                     }
                     catch (OperationCanceledException)
                     {
