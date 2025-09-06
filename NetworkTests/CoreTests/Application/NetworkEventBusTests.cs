@@ -2,7 +2,7 @@ using System;
 using NUnit.Framework;
 using Moq;
 using Microsoft.Extensions.Logging;
-using NetworkHexagonal.Core.Application.Services;
+using Network.Core.Application.Services;
 
 namespace NetworkTests.CoreTests.Application
 {

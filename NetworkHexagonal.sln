@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkTests", "NetworkTest
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkTests.Console", "NetworkTests.Console\NetworkTests.Console.csproj", "{4D6F9854-CAA9-482D-A036-DCC55AE2660E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Network.Core", "External\Network.Core\Network.Core.csproj", "{8C03C39A-1F02-4691-8777-4EEC8C139D90}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Network.Adapters", "Network.Adapters\Network.Adapters.csproj", "{BF7D2000-8F7C-47F7-ADCE-2A875DAFEAE4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +41,14 @@ Global
 		{4D6F9854-CAA9-482D-A036-DCC55AE2660E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D6F9854-CAA9-482D-A036-DCC55AE2660E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4D6F9854-CAA9-482D-A036-DCC55AE2660E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C03C39A-1F02-4691-8777-4EEC8C139D90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C03C39A-1F02-4691-8777-4EEC8C139D90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C03C39A-1F02-4691-8777-4EEC8C139D90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C03C39A-1F02-4691-8777-4EEC8C139D90}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF7D2000-8F7C-47F7-ADCE-2A875DAFEAE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF7D2000-8F7C-47F7-ADCE-2A875DAFEAE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF7D2000-8F7C-47F7-ADCE-2A875DAFEAE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF7D2000-8F7C-47F7-ADCE-2A875DAFEAE4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

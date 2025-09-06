@@ -2,13 +2,12 @@ using System;
 using System.Numerics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Network.Adapters.LiteNet;
+using Network.Core.Application.Ports.Outbound;
+using Network.Core.Domain.Exceptions;
+using Network.Core.Domain.Models;
 using NUnit.Framework;
-using NetworkHexagonal.Core.Application.Ports.Outbound;
-using NetworkHexagonal.Core.Domain.Exceptions;
-using NetworkHexagonal.Core.Domain.Models;
-using NetworkHexagonal.Infrastructure.DependencyInjection;
 using NetworkHexagonal.Adapters.Outbound.Serialization;
-using NetworkHexagonal.Adapters.Outbound.Network;
 
 namespace NetworkTests.AdaptersTests.Serialization
 {
