@@ -24,7 +24,6 @@ public class Program
             return;
         }
         
-        bool isServer = args[0].ToLower() == "server";
 
         string mode = args[0].ToLower();
         
@@ -53,12 +52,16 @@ public class Program
         });
 
         // Registra serviços de rede e o GameLoop
-        if (isServer)
+        if (mode == "server")
             services.AddServerNetworking();
-        else
+        else if (mode == "client")
             services.AddClientNetworking();
         
         services.AddGameLoopIntegration(); // Assume que este método registra o Loop e o HostedService (se houver)
+        
+        services.AddSingleton<NetworkLoopAdapter>();
+        services.AddSingleton<IInitializable>(sp => sp.GetRequiredService<NetworkLoopAdapter>());
+        services.AddSingleton<IUpdatable>(sp => sp.GetRequiredService<NetworkLoopAdapter>());
 
         // Registra nosso novo gerenciador de chat e input
         services.AddSingleton(sp => new ConsoleChatManager(
@@ -79,6 +82,9 @@ public class Program
         var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
         var packetRegistry = serviceProvider.GetRequiredService<IPacketRegistry>();
         var gameLoop = serviceProvider.GetRequiredService<GameLoop>();
+        
+        var netOptions = serviceProvider.GetRequiredService<NetworkOptions>();
+        logger.LogInformation($"Configurações de Rede: {netOptions.ToString()}");
 
         // Registra manipuladores de pacotes
         packetRegistry.RegisterHandler<ChatMessage>((message, context) => {

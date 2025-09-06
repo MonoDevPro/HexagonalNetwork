@@ -16,5 +16,5 @@ public interface IClientNetworkApp : IDisposable
     Task<ConnectionResult> ConnectAsync();
     bool TryConnect(out ConnectionResult result);
     void Disconnect();
-    void Update();
+    void Update(float deltaTime);
 }

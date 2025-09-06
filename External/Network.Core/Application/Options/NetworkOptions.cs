@@ -17,4 +17,13 @@ public class NetworkOptions
     public string ServerAddress { get; set; } = "127.0.0.1";
     public int ServerPort { get; set; } = 7777;
     public string ConnectionKey { get; set; } = "default_key";
+    
+    public override string ToString()
+    {
+        return $"[NetworkOptions: AutoReconnect={AutoReconnect}, ConnectDelayMs={ConnectDelayMs}, " +
+               $"ReconnectInitialDelayMs={ReconnectInitialDelayMs}, ReconnectMaxDelayMs={ReconnectMaxDelayMs}, " +
+               $"UpdateIntervalMs={UpdateIntervalMs}, DisconnectTimeoutMs={DisconnectTimeoutMs}, " +
+               $"UseUnsyncedEvents={UseUnsyncedEvents}, ServerAddress={ServerAddress}, " +
+               $"ServerPort={ServerPort}, ConnectionKey={ConnectionKey}]";
+    }
 }

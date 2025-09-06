@@ -1,7 +1,7 @@
 using Network.Core.Application.Loop;
 using Network.Core.Application.Ports.Inbound;
 
-namespace Network.Adapters.Loop;
+namespace NetworkExample.Console;
 
 public class NetworkLoopAdapter(IClientNetworkApp? clientNetworkApp = null, IServerNetworkApp? serverNetworkApp = null) : IOrderedInitializable, IOrderedUpdatable
 {
@@ -31,7 +31,7 @@ public class NetworkLoopAdapter(IClientNetworkApp? clientNetworkApp = null, ISer
 
     public void Update(float deltaTime)
     {
-        clientNetworkApp?.Update();
-        serverNetworkApp?.Update();
+        clientNetworkApp?.Update(deltaTime);
+        serverNetworkApp?.Update(deltaTime);
     }
 }

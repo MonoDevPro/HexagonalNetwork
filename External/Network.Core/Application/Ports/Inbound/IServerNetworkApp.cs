@@ -13,6 +13,6 @@ public interface IServerNetworkApp
     bool Start();
     void Stop();
     void DisconnectPeer(int peerId);
-    void Update();
+    void Update(float deltaTime);
     void Dispose();
 }

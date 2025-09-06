@@ -1,11 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
 using Network.Adapters.LiteNet;
-using Network.Adapters.Loop;
 using Network.Adapters.Serialization;
 using Network.Core.Application.Loop;
-using Network.Core.Application.Options;
 using Network.Core.Application.Ports.Inbound;
 using Network.Core.Application.Ports.Outbound;
 using Network.Core.Application.Services;
@@ -53,10 +50,6 @@ public static class ServiceRegistration
     public static IServiceCollection AddGameLoopIntegration(this IServiceCollection services)
     {
         services.AddSingleton<GameLoop>();
-        
-        services.AddSingleton<NetworkLoopAdapter>();
-        services.AddSingleton<IInitializable>(sp => sp.GetRequiredService<NetworkLoopAdapter>());
-        services.AddSingleton<IUpdatable>(sp => sp.GetRequiredService<NetworkLoopAdapter>());
         
         return services;
     }

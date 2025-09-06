@@ -63,7 +63,7 @@ public class ServerApp : IServerNetworkApp
         _serverNetworkService.Stop();
     }
 
-    public void Update()
+    public void Update(float deltaTime)
     {
         _serverNetworkService.Update();
     }
