@@ -8,23 +8,15 @@ using Network.Core.Domain.Models;
 
 namespace Network.Core.Application.Services;
 
-public class ClientNetworkApp(
-    NetworkOptions config,
-    IClientNetworkService networkService,
-    IPacketSender packetSender,
-    IConnectionManager connectionManager,
-    IPacketRegistry packetRegistry,
-    INetworkEventBus eventBus,
-    ILogger<ClientNetworkApp> logger)
-    : IClientNetworkApp
+public class ClientNetworkApp : IClientNetworkApp
 {
     private enum ConnectionStatus { Disconnected, Connecting, Connected, Reconnecting }
     
-    public NetworkOptions Options { get; } = config;
-    public INetworkEventBus EventBus { get; } = eventBus;
-    public IPacketSender PacketSender { get; } = packetSender;
-    public IConnectionManager ConnectionManager { get; } = connectionManager;
-    public IPacketRegistry PacketRegistry { get;} = packetRegistry;
+    public NetworkOptions Options { get; }
+    public INetworkEventBus EventBus { get; }
+    public IPacketSender PacketSender { get; }
+    public IConnectionManager ConnectionManager { get; }
+    public IPacketRegistry PacketRegistry { get;}
 
     private ConnectionStatus _status = ConnectionStatus.Disconnected;
     private bool _shouldStayConnected;
@@ -32,9 +24,25 @@ public class ClientNetworkApp(
     private int _reconnectAttempts;
 
     private TaskCompletionSource<ConnectionResult>? _connectionTcs;
+    private readonly IClientNetworkService _networkService;
+    private readonly ILogger<ClientNetworkApp> _logger;
 
-    public void Initialize()
+    public ClientNetworkApp(NetworkOptions config,
+        IClientNetworkService networkService,
+        IPacketSender packetSender,
+        IConnectionManager connectionManager,
+        IPacketRegistry packetRegistry,
+        INetworkEventBus eventBus,
+        ILogger<ClientNetworkApp> logger)
     {
+        _networkService = networkService;
+        _logger = logger;
+        Options = config;
+        EventBus = eventBus;
+        PacketSender = packetSender;
+        ConnectionManager = connectionManager;
+        PacketRegistry = packetRegistry;
+        
         EventBus.Subscribe<ConnectionEvent>(OnConnected);
         EventBus.Subscribe<DisconnectionEvent>(OnDisconnected);
     }
@@ -51,7 +59,7 @@ public class ClientNetworkApp(
         _connectionTcs = new TaskCompletionSource<ConnectionResult>();
 
         // Tenta iniciar a conexão de forma síncrona
-        if (!networkService.TryConnect(Options.ServerAddress, Options.ServerPort, out var initialResult))
+        if (!_networkService.TryConnect(Options.ServerAddress, Options.ServerPort, out var initialResult))
         {
             // Se a falha for imediata, já resolve a Task
             OnDisconnected(new DisconnectionEvent(-1, DisconnectReason.Rejected)); // Simula uma desconexão
@@ -69,18 +77,18 @@ public class ClientNetworkApp(
     public bool TryConnect(out ConnectionResult result)
     {
         _shouldStayConnected = true;
-        return networkService.TryConnect(Options.ServerAddress, Options.ServerPort, out result);
+        return _networkService.TryConnect(Options.ServerAddress, Options.ServerPort, out result);
     }
 
     public void Disconnect()
     {
         _shouldStayConnected = false;
-        networkService.Disconnect();
+        _networkService.Disconnect();
     }
 
     public void Update(float deltaTime)
     {
-        networkService.Update();
+        _networkService.Update();
 
         if (_status == ConnectionStatus.Reconnecting)
         {
@@ -91,15 +99,15 @@ public class ClientNetworkApp(
             {
                 _reconnectTimer = 0f;
                 _reconnectAttempts++;
-                logger.LogInformation("Tentativa de reconexão {attempt}...", _reconnectAttempts);
-                networkService.TryConnect(Options.ServerAddress, Options.ServerPort, out _);
+                _logger.LogInformation("Tentativa de reconexão {attempt}...", _reconnectAttempts);
+                _networkService.TryConnect(Options.ServerAddress, Options.ServerPort, out _);
             }
         }
     }
 
     private void OnConnected(ConnectionEvent e)
     {
-        logger.LogInformation("Conexão estabelecida com o servidor!");
+        _logger.LogInformation("Conexão estabelecida com o servidor!");
         _status = ConnectionStatus.Connected;
         _reconnectAttempts = 0;
         _reconnectTimer = 0;
@@ -119,7 +127,7 @@ public class ClientNetworkApp(
 
         if (_shouldStayConnected && Options.AutoReconnect)
         {
-            logger.LogWarning(wasConnected ? "Conexão perdida. Iniciando reconexão..." : "Falha ao conectar. Iniciando reconexão...");
+            _logger.LogWarning(wasConnected ? "Conexão perdida. Iniciando reconexão..." : "Falha ao conectar. Iniciando reconexão...");
             _status = ConnectionStatus.Reconnecting;
             _reconnectAttempts = 0;
             _reconnectTimer = 0f;
@@ -132,15 +140,16 @@ public class ClientNetworkApp(
         // Se a Task ainda não foi completada (nem por sucesso, nem por falha), completa com timeout.
         if (_connectionTcs != null && !_connectionTcs.Task.IsCompleted)
         {
-            logger.LogWarning("Timeout de conexão atingido.");
+            _logger.LogWarning("Timeout de conexão atingido.");
             // Força a desconexão para limpar o estado do adaptador
-            networkService.Disconnect();
+            _networkService.Disconnect();
             // O evento de desconexão vai chamar OnDisconnected e resolver a Task
         }
     }
 
     public void Dispose()
     {
+        _networkService.Disconnect();
         EventBus.Unsubscribe<ConnectionEvent>(OnConnected);
         EventBus.Unsubscribe<DisconnectionEvent>(OnDisconnected);
     }

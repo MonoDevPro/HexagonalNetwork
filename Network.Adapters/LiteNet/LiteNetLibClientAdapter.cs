@@ -52,21 +52,25 @@ public class LiteNetLibClientAdapter : IClientNetworkService
     /// </summary>
     public bool TryConnect(string serverAddress, int port, out ConnectionResult result)
     {
-        if (_netManager.IsRunning)
+        // Se já estamos conectados, não fazemos nada.
+        if (_netManager.IsRunning && _serverPeer != null && _serverPeer.ConnectionState == ConnectionState.Connected)
         {
-            result = new ConnectionResult(false, "Cliente já está rodando ou conectando.");
+            result = new ConnectionResult(false, "Cliente já está conectado.");
             return false;
+        }
+        
+        // Garante que o NetManager está rodando antes de tentar conectar.
+        if (!_netManager.IsRunning)
+        {
+            _netManager.Start();
         }
 
         try
         {
-            _netManager.Start();
             _serverPeer = _netManager.Connect(serverAddress, port, _options.ConnectionKey);
 
             if (_serverPeer == null)
             {
-                // Falha imediata ao tentar conectar (ex: endereço inválido)
-                _netManager.Stop();
                 result = new ConnectionResult(false, "Falha ao iniciar conexão. Verifique o endereço e a porta.");
                 return false;
             }
@@ -82,19 +86,21 @@ public class LiteNetLibClientAdapter : IClientNetworkService
         }
     }
 
+    /// <summary>
+    /// Desconecta intencionalmente do servidor e para o serviço de rede.
+    /// </summary>
     public void Disconnect()
     {
         if (_serverPeer != null)
         {
             _serverPeer.Disconnect();
-            // O evento de desconexão cuidará da limpeza
         }
         
         if (_netManager.IsRunning)
         {
             _netManager.Stop();
         }
-        _logger.LogInformation("Cliente desconectado do servidor");
+        _logger.LogInformation("Cliente desconectado intencionalmente.");
     }
 
     public void Update()
@@ -119,12 +125,6 @@ public class LiteNetLibClientAdapter : IClientNetworkService
                 peer.Id, info.Reason);
             _connectionManager.UnregisterPeer(0);
             _serverPeer = null;
-
-            // Se o NetManager ainda estiver rodando (desconexão inesperada), paramos para permitir uma nova tentativa de conexão limpa.
-            if (_netManager.IsRunning)
-            {
-                _netManager.Stop();
-            }
 
             _eventBus.Publish(new DisconnectionEvent(peer.Id,
                 MapDisconnectReasonToDomain(info.Reason)));

@@ -11,8 +11,6 @@ public interface IClientNetworkApp : IDisposable
     IPacketSender PacketSender { get; }
     IPacketRegistry PacketRegistry { get; }
     INetworkEventBus EventBus { get; }
-
-    void Initialize();
     Task<ConnectionResult> ConnectAsync();
     bool TryConnect(out ConnectionResult result);
     void Disconnect();

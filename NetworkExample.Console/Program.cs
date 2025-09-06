@@ -63,7 +63,6 @@ public class Program
             services.AddClientNetworking();
         
         services.AddGameLoopIntegration()
-            .AddGameService<ConsoleChatManager>()
             .AddGameService<NetworkLoopAdapter>(); 
 
         services.AddSingleton(sp => new ConsoleChatManager(
@@ -72,6 +71,8 @@ public class Program
             sp.GetRequiredService<IPacketSender>(),
             sp.GetRequiredService<INetworkEventBus>()
         ));
+        services.AddSingleton<IInitializable>(sp => sp.GetRequiredService<ConsoleChatManager>());
+        services.AddSingleton<IUpdatable>(sp => sp.GetRequiredService<ConsoleChatManager>());
         
         await using var serviceProvider = services.BuildServiceProvider();
         

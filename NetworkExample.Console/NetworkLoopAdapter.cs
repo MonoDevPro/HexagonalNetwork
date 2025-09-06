@@ -16,9 +16,12 @@ public class NetworkLoopAdapter(IClientNetworkApp? clientNetworkApp = null, ISer
 
     public async Task InitializeAsync(CancellationToken ct = default)
     {
-        serverNetworkApp?.Start();
-        clientNetworkApp?.TryConnect(out _);
-        await Task.CompletedTask;
+        if (serverNetworkApp is not null)
+            serverNetworkApp.Start();
+        
+        if (clientNetworkApp is not null)
+            await clientNetworkApp.ConnectAsync();
+        
     }
 
     public Task StopAsync(CancellationToken ct = default)
