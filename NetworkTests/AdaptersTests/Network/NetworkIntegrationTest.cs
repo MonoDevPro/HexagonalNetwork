@@ -90,8 +90,8 @@ namespace NetworkTests.AdaptersTests.Network
             });
             
             // Conecta o cliente
-            var result = await _clientService.ConnectAsync("localhost", 9050);
-            NUnit.Framework.Assert.That(result.Success, "Client should connect successfully");
+            _clientService.TryConnect("localhost", 9050, out var connectResult);
+            NUnit.Framework.Assert.That(connectResult.Success, "Client should connect successfully");
             
             // Aguarda processamento inicial
             await Task.Delay(100);

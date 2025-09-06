@@ -21,17 +21,20 @@ public class ConsoleChatManager : IOrderedInitializable, IOrderedUpdatable
     private readonly ConcurrentQueue<string> _inputQueue = new();
     private readonly HashSet<int> _connectedPeers = new();
     private CancellationTokenSource _cts = new();
-    private string _username = "Servidor";
 
     // O input deve ser processado após as atualizações de rede
     public int Order => 100;
 
-    public ConsoleChatManager(string mode, IPacketSender packetSender, INetworkEventBus eventBus)
+    private string _username;
+
+    public ConsoleChatManager(string mode, string username, IPacketSender packetSender, INetworkEventBus eventBus)
     {
         _mode = mode.ToLower();
+        _username = username;
         _packetSender = packetSender;
         _eventBus = eventBus;
     }
+
 
     public Task InitializeAsync(CancellationToken ct = default)
     {
@@ -45,8 +48,6 @@ public class ConsoleChatManager : IOrderedInitializable, IOrderedUpdatable
         else // client
         {
             _eventBus.Subscribe<DisconnectionEvent>(HandleClientDisconnection);
-            System.Console.Write("Digite seu nome de usuário: ");
-            _username = System.Console.ReadLine() ?? "Player";
         }
         
         System.Console.WriteLine("Digite mensagens para enviar. Pressione Ctrl+C para sair.");

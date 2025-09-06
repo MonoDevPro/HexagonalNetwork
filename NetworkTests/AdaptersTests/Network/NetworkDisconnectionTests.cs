@@ -87,8 +87,8 @@ namespace NetworkTests.AdaptersTests.Network
             });
             
             // Conecta o cliente
-            var result = await _clientService.ConnectAsync("localhost", 9051);
-            Assert.That(result.Success, Is.True, "Client should connect successfully");
+             _clientService.TryConnect("localhost", 9051, out var connectResult);
+            Assert.That(connectResult.Success, Is.True, "Client should connect successfully");
             
             // Espera um pouco para garantir que o evento de conexão foi processado
             await Task.Delay(100);
