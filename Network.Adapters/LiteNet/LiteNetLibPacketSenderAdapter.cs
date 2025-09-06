@@ -1,11 +1,10 @@
 using LiteNetLib;
 using Microsoft.Extensions.Logging;
-using Network.Adapters.LiteNet;
 using Network.Core.Application.Ports.Outbound;
 using Network.Core.Domain.Enums;
 using Network.Core.Domain.Models;
 
-namespace NetworkHexagonal.Adapters.Outbound.Network
+namespace Network.Adapters.LiteNet
 {
     /// <summary>
     /// Adaptador para envio de pacotes usando LiteNetLib

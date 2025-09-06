@@ -3,7 +3,7 @@ using Network.Core.Application.Ports.Outbound;
 using Network.Core.Domain.Exceptions;
 using Network.Core.Domain.Models;
 
-namespace NetworkHexagonal.Adapters.Outbound.Network;
+namespace Network.Adapters.LiteNet;
 
 /// <summary>
 /// Adaptador para registro de manipuladores de pacotes

@@ -1,11 +1,11 @@
 using System;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Network.Adapters.LiteNet;
 using Network.Core.Application.Ports.Outbound;
 using Network.Core.Domain.Exceptions;
 using Network.Core.Domain.Models;
 using NUnit.Framework;
-using NetworkHexagonal.Adapters.Outbound.Network;
 
 namespace NetworkTests.AdaptersTests.Network
 {

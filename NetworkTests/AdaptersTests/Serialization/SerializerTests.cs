@@ -3,11 +3,11 @@ using System.Numerics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Network.Adapters.LiteNet;
+using Network.Adapters.Serialization;
 using Network.Core.Application.Ports.Outbound;
 using Network.Core.Domain.Exceptions;
 using Network.Core.Domain.Models;
 using NUnit.Framework;
-using NetworkHexagonal.Adapters.Outbound.Serialization;
 
 namespace NetworkTests.AdaptersTests.Serialization
 {

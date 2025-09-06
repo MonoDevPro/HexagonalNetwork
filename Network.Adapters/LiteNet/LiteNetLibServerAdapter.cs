@@ -4,7 +4,6 @@ using Network.Core.Application.Ports.Inbound;
 using Network.Core.Application.Ports.Outbound;
 using Network.Core.Domain.Events;
 using Network.Core.Domain.Models;
-using NetworkHexagonal.Adapters.Outbound.Network;
 using DisconnectReason = Network.Core.Domain.Enums.DisconnectReason;
 
 namespace Network.Adapters.LiteNet

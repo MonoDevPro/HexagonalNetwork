@@ -3,10 +3,9 @@ using Microsoft.Extensions.Logging;
 using Network.Adapters.LiteNet;
 using Network.Core.Application.Ports.Outbound;
 using Network.Core.Domain.Models;
-using NetworkHexagonal.Adapters.Outbound.Network;
 using ISerializable = Network.Core.Domain.Models.ISerializable;
 
-namespace NetworkHexagonal.Adapters.Outbound.Serialization
+namespace Network.Adapters.Serialization
 {
     /// <summary>
     /// Adaptador de serialização usando LiteNetLib

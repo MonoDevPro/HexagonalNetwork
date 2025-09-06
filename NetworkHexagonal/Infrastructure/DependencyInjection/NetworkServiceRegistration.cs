@@ -1,11 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Network.Adapters.LiteNet;
+using Network.Adapters.Serialization;
 using Network.Core.Application.Ports.Inbound;
 using Network.Core.Application.Ports.Outbound;
 using Network.Core.Application.Services;
-using NetworkHexagonal.Adapters.Outbound.Network;
-using NetworkHexagonal.Adapters.Outbound.Serialization;
 
 namespace NetworkHexagonal.Infrastructure.DependencyInjection
 {
