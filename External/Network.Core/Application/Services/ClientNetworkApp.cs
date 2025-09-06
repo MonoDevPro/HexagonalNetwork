@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Network.Core.Application.Loop;
 using Network.Core.Application.Options;
 using Network.Core.Application.Ports.Inbound;
 using Network.Core.Application.Ports.Outbound;
@@ -8,7 +9,7 @@ using Network.Core.Domain.Models;
 
 namespace Network.Core.Application.Services;
 
-public class ClientNetworkApp : IClientNetworkApp
+public class ClientNetworkApp : IClientNetworkApp, IOrderedUpdatableAsync
 {
     private enum ConnectionStatus { Disconnected, Connecting, Connected, Reconnecting }
     
@@ -26,6 +27,9 @@ public class ClientNetworkApp : IClientNetworkApp
     private TaskCompletionSource<ConnectionResult>? _connectionTcs;
     private readonly IClientNetworkService _networkService;
     private readonly ILogger<ClientNetworkApp> _logger;
+    
+    // Async update support
+    public int Order => 100; // Network operations should happen early in the update cycle
 
     public ClientNetworkApp(NetworkOptions config,
         IClientNetworkService networkService,
@@ -101,6 +105,28 @@ public class ClientNetworkApp : IClientNetworkApp
                 _reconnectAttempts++;
                 _logger.LogInformation("Tentativa de reconexão {attempt}...", _reconnectAttempts);
                 _networkService.TryConnect(Options.ServerAddress, Options.ServerPort, out _);
+            }
+        }
+    }
+
+    public async Task UpdateAsync(float deltaTime, CancellationToken cancellationToken = default)
+    {
+        // Perform non-blocking network operations
+        await Task.Run(() => _networkService.Update(), cancellationToken);
+
+        if (_status == ConnectionStatus.Reconnecting)
+        {
+            _reconnectTimer += deltaTime;
+            var delay = Math.Min(Options.ReconnectInitialDelayMs / 1000f * Math.Pow(2, _reconnectAttempts), Options.ReconnectMaxDelayMs / 1000f);
+
+            if (_reconnectTimer >= delay)
+            {
+                _reconnectTimer = 0f;
+                _reconnectAttempts++;
+                _logger.LogInformation("Tentativa de reconexão {attempt}...", _reconnectAttempts);
+                
+                // Async connection attempt
+                await Task.Run(() => _networkService.TryConnect(Options.ServerAddress, Options.ServerPort, out _), cancellationToken);
             }
         }
     }
