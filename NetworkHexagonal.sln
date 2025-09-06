@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkHexagonal", "NetworkHexagonal\NetworkHexagonal.csproj", "{DCDBD5C9-5C6F-47D4-9AC2-6B84F2E2D6CB}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{CEDC3D49-F7E4-4667-A6BA-1596071050CD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LiteNetLib", "LiteNetLib", "{BE2E30F4-6687-476E-A64A-E00F5E8D701B}"
@@ -13,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiteNetLib", "External\Lite
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkTests", "NetworkTests\NetworkTests.csproj", "{607B85A8-FE83-4144-BE78-81D63FB09055}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkTests.Console", "NetworkTests.Console\NetworkTests.Console.csproj", "{4D6F9854-CAA9-482D-A036-DCC55AE2660E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkExample.Console", "NetworkExample.Console\NetworkExample.Console.csproj", "{4D6F9854-CAA9-482D-A036-DCC55AE2660E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Network.Core", "External\Network.Core\Network.Core.csproj", "{8C03C39A-1F02-4691-8777-4EEC8C139D90}"
 EndProject
@@ -25,10 +23,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DCDBD5C9-5C6F-47D4-9AC2-6B84F2E2D6CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DCDBD5C9-5C6F-47D4-9AC2-6B84F2E2D6CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DCDBD5C9-5C6F-47D4-9AC2-6B84F2E2D6CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DCDBD5C9-5C6F-47D4-9AC2-6B84F2E2D6CB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FD0C256F-9FED-4DA4-BB16-D9FD57A3A72D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FD0C256F-9FED-4DA4-BB16-D9FD57A3A72D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD0C256F-9FED-4DA4-BB16-D9FD57A3A72D}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -9,30 +9,21 @@ namespace Network.Adapters.LiteNet
     /// <summary>
     /// Adaptador para processamento de pacotes recebidos pela rede
     /// </summary>
-    public class LiteNetLibPacketHandlerAdapter
+    public class LiteNetLibPacketHandlerAdapter(
+        IPacketRegistry packetRegistry,
+        ILogger<LiteNetLibPacketHandlerAdapter> logger)
     {
-        private readonly ILogger<LiteNetLibPacketHandlerAdapter> _logger;
-        private readonly IPacketRegistry _packetRegistry;
-        
         public event Action<NetworkErrorEvent>? OnError;
-        
-        public LiteNetLibPacketHandlerAdapter(
-            IPacketRegistry packetRegistry,
-            ILogger<LiteNetLibPacketHandlerAdapter> logger)
-        {
-            _packetRegistry = packetRegistry;
-            _logger = logger;
-        }
-        
+
         /// <summary>
         /// Processa um pacote recebido da rede
         /// </summary>
         public void HandleNetworkReceive(NetPeer peer, NetPacketReader reader, byte channel, DeliveryMethod method)
         {
+            var networkReader = LiteNetLibReaderAdapter.Pool.Get();
             try
             {
                 // Obtém o ID do pacote do cabeçalho
-                var networkReader = LiteNetLibReaderAdapter.Pool.Get();
                 networkReader.SetSource(reader.RawData);
                 networkReader.ResetPosition(reader.Position);
                 var packetId = networkReader.ReadULong();
@@ -41,17 +32,17 @@ namespace Network.Adapters.LiteNet
                 var context = new PacketContext(peer.Id, channel);
                 
                 // Processa o pacote
-                _packetRegistry.HandlePacket(packetId, networkReader, context);
+                packetRegistry.HandlePacket(packetId, networkReader, context);
 
-                networkReader.Recycle();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao processar pacote de rede do peer {PeerId}", peer.Id);
+                logger.LogError(ex, "Erro ao processar pacote de rede do peer {PeerId}", peer.Id);
                 OnError?.Invoke(new NetworkErrorEvent(ex.Message, peer.Id));
             }
             finally
             {
+                networkReader.Recycle();
                 reader.Recycle();
             }
         }

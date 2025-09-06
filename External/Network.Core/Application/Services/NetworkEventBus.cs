@@ -13,23 +13,17 @@ namespace Network.Core.Application.Services;
 /// Para esses casos, utilize mecanismos diretos e otimizados, evitando overhead de abstração e casting.
 /// </para>
 /// </summary>
-public class NetworkEventBus : INetworkEventBus
+public class NetworkEventBus(ILogger<NetworkEventBus> logger) : INetworkEventBus
 {
     private readonly Dictionary<Type, List<object>> _handlers = new();
-    private readonly ILogger<NetworkEventBus> _logger;
-    
-    public NetworkEventBus(ILogger<NetworkEventBus> logger)
-    {
-        _logger = logger;
-    }
-    
+
     public void Publish<TEvent>(TEvent eventData) where TEvent : class
     {
         var eventType = typeof(TEvent);
         
         if (!_handlers.TryGetValue(eventType, out var handlers))
         {
-            _logger.LogTrace("Não há manipuladores registrados para o evento do tipo {EventType}", eventType.Name);
+            logger.LogTrace("Não há manipuladores registrados para o evento do tipo {EventType}", eventType.Name);
             return;
         }
         
@@ -41,7 +35,7 @@ public class NetworkEventBus : INetworkEventBus
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao executar manipulador de evento para {EventType}", eventType.Name);
+                logger.LogError(ex, "Erro ao executar manipulador de evento para {EventType}", eventType.Name);
             }
         }
     }
@@ -57,7 +51,7 @@ public class NetworkEventBus : INetworkEventBus
         }
         
         handlers.Add(handler);
-        _logger.LogDebug("Manipulador inscrito para eventos do tipo {EventType}", eventType.Name);
+        logger.LogDebug("Manipulador inscrito para eventos do tipo {EventType}", eventType.Name);
     }
     
     public void Unsubscribe<TEvent>(Action<TEvent> handler) where TEvent : class
@@ -70,6 +64,6 @@ public class NetworkEventBus : INetworkEventBus
         }
         
         handlers.Remove(handler);
-        _logger.LogDebug("Manipulador removido de eventos do tipo {EventType}", eventType.Name);
+        logger.LogDebug("Manipulador removido de eventos do tipo {EventType}", eventType.Name);
     }
 }

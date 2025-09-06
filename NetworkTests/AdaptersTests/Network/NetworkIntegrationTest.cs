@@ -1,13 +1,11 @@
-using System;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Network.Adapters;
 using Network.Core.Application.Ports.Inbound;
 using Network.Core.Application.Ports.Outbound;
 using Network.Core.Domain.Events;
 using Network.Core.Domain.Models;
 using NUnit.Framework;
-using NetworkHexagonal.Infrastructure.DependencyInjection;
 
 namespace NetworkTests.AdaptersTests.Network
 {
@@ -35,16 +33,9 @@ namespace NetworkTests.AdaptersTests.Network
             });
 
             // Configura o serviço para usar UnsyncedEvents = true para testes
-            services.AddSingleton<INetworkConfiguration>(provider => new NetworkConfiguration
-            {
-                UpdateIntervalMs = 15,
-                DisconnectTimeoutMs = 5000,
-                ConnectionKey = "TestConnectionKey",
-                UseUnsyncedEvents = true
-            });
-            
             // Adiciona serviços de rede
-            services.AddNetworking();
+            services.AddClientNetworking();
+            services.AddServerNetworking();
             
             _serviceProvider = services.BuildServiceProvider();
             

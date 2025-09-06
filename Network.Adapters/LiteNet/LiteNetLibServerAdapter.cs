@@ -1,5 +1,6 @@
 using LiteNetLib;
 using Microsoft.Extensions.Logging;
+using Network.Core.Application.Options;
 using Network.Core.Application.Ports.Inbound;
 using Network.Core.Application.Ports.Outbound;
 using Network.Core.Domain.Events;
@@ -18,11 +19,11 @@ namespace Network.Adapters.LiteNet
         private readonly ILogger<LiteNetLibServerAdapter> _logger;
         private readonly LiteNetLibPacketHandlerAdapter _packetHandler;
         private readonly LiteNetLibConnectionManagerAdapter _connectionManager;
-        private readonly INetworkConfiguration _config;
+        private readonly NetworkOptions _config;
         private readonly INetworkEventBus _eventBus;
         
         public LiteNetLibServerAdapter(
-            INetworkConfiguration config,
+            NetworkOptions config,
             LiteNetLibPacketHandlerAdapter packetHandler,
             LiteNetLibConnectionManagerAdapter connectionManager,
             ILogger<LiteNetLibServerAdapter> logger,

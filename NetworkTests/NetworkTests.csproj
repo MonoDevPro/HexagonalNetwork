@@ -31,16 +31,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../NetworkHexagonal/NetworkHexagonal.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Using Include="NUnit" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="AdaptersTests/" />
     <Folder Include="CoreTests/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Network.Adapters\Network.Adapters.csproj" />
   </ItemGroup>
 
   <!-- Configuração para geração de relatórios de cobertura -->

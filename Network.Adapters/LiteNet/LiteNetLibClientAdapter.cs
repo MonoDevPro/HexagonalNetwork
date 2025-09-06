@@ -1,5 +1,6 @@
 using LiteNetLib;
 using Microsoft.Extensions.Logging;
+using Network.Core.Application.Options;
 using Network.Core.Application.Ports.Inbound;
 using Network.Core.Application.Ports.Outbound;
 using Network.Core.Domain.Events;
@@ -16,14 +17,14 @@ public class LiteNetLibClientAdapter : IClientNetworkService
     private readonly EventBasedNetListener _listener;
     private readonly ILogger<LiteNetLibClientAdapter> _logger;
     private readonly LiteNetLibPacketHandlerAdapter _packetHandler;
-    private readonly INetworkConfiguration _config;
+    private readonly NetworkOptions _options;
     private readonly LiteNetLibConnectionManagerAdapter _connectionManager;
     private readonly INetworkEventBus _eventBus;
     private NetPeer? _serverPeer;
     private TaskCompletionSource<ConnectionResult>? _connectionTcs;
         
     public LiteNetLibClientAdapter(
-        INetworkConfiguration config, 
+        NetworkOptions options, 
         LiteNetLibPacketHandlerAdapter packetHandler,
         LiteNetLibConnectionManagerAdapter connectionManager,
         ILogger<LiteNetLibClientAdapter> logger,
@@ -31,16 +32,16 @@ public class LiteNetLibClientAdapter : IClientNetworkService
     {
         _logger = logger;
         _packetHandler = packetHandler;
-        _config = config;
+        _options = options;
         _connectionManager = connectionManager;
         _eventBus = eventBus;
             
         _listener = new EventBasedNetListener();
         _netManager = new NetManager(_listener)
         {
-            UpdateTime = config.UpdateIntervalMs,
-            DisconnectTimeout = config.DisconnectTimeoutMs,
-            UnsyncedEvents = config.UseUnsyncedEvents // Usa a configuração para determinar o modo de eventos
+            UpdateTime = options.UpdateIntervalMs,
+            DisconnectTimeout = options.DisconnectTimeoutMs,
+            UnsyncedEvents = options.UseUnsyncedEvents // Usa a configuração para determinar o modo de eventos
         };
             
         _packetHandler.OnError += error => _eventBus.Publish(error); // Publica erro diretamente no barramento
@@ -65,7 +66,7 @@ public class LiteNetLibClientAdapter : IClientNetworkService
             _netManager.Start();
                 
             // Usa a chave de conexão da configuração em vez de uma string literal
-            _serverPeer = _netManager.Connect(serverAddress, port, _config.ConnectionKey);
+            _serverPeer = _netManager.Connect(serverAddress, port, _options.ConnectionKey);
                 
             // Inicia tarefa de timeout
             _ = StartTimeoutTask(timeoutMs);
@@ -78,7 +79,21 @@ public class LiteNetLibClientAdapter : IClientNetworkService
             return Task.FromResult(new ConnectionResult(false, ex.Message));
         }
     }
-        
+
+    public bool TryConnect(string serverAddress, int port, out ConnectionResult result)
+    {
+        _netManager.Start();
+        _serverPeer = _netManager.Connect(serverAddress, port, _options.ConnectionKey);
+        if (_serverPeer == null)
+        {
+            result = new ConnectionResult(false, "Falha ao iniciar conexão");
+            return false;
+        }
+
+        result = new ConnectionResult(true, string.Empty);
+        return true;
+    }
+
     /// <summary>
     /// Desconecta do servidor
     /// </summary>

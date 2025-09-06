@@ -1,3 +1,4 @@
+using Network.Core.Application.Options;
 using Network.Core.Application.Ports.Inbound;
 using Network.Core.Application.Ports.Outbound;
 using Network.Core.Domain.Events;
@@ -8,7 +9,7 @@ public class ServerApp : IServerNetworkApp
 {
     private readonly IServerNetworkService _serverNetworkService;
 
-    public INetworkConfiguration Configuration { get; }
+    public NetworkOptions Options { get; }
     public IConnectionManager ConnectionManager { get; }
     public IPacketSender PacketSender { get; }
     public IPacketRegistry PacketRegistry { get;}
@@ -16,14 +17,14 @@ public class ServerApp : IServerNetworkApp
 
     public ServerApp(
         IServerNetworkService networkService,
-        INetworkConfiguration config,
+        NetworkOptions config,
         IConnectionManager connectionManager,
         IPacketSender packetSender,
         IPacketRegistry packetRegistry,
         INetworkEventBus eventBus)
     {
         _serverNetworkService = networkService;
-        Configuration = config;
+        Options = config;
         ConnectionManager = connectionManager;
         PacketSender = packetSender;
         PacketRegistry = packetRegistry;
@@ -44,7 +45,7 @@ public class ServerApp : IServerNetworkApp
         // Podemos facilmente processar uma blacklist de IPs ou verificar se o cliente já está conectado
         // Também podemos delegar isso para um serviço de autenticação.
 
-        if (connectionKey == Configuration.ConnectionKey)
+        if (connectionKey == Options.ConnectionKey)
             // Aceitar a conexão
             connectionRequest.EventArgs.ShouldAccept = true;
         else
@@ -52,26 +53,14 @@ public class ServerApp : IServerNetworkApp
             connectionRequest.EventArgs.ShouldAccept = false;
     }
 
-    public void Initialize()
+    public bool Start()
     {
-        // Registrar pacotes padrão se necessário
-    }
-
-    public void Dispose()
-    {
-        // Desregistrar pacotes se necessário
-    }
-
-    public bool Start(int port)
-    {
-        return _serverNetworkService.Start(port);
-        // Disparar evento de inicialização se necessário
+        return _serverNetworkService.Start(Options.ServerPort);
     }
 
     public void Stop()
     {
         _serverNetworkService.Stop();
-        // Disparar evento de parada se necessário
     }
 
     public void Update()
@@ -82,5 +71,11 @@ public class ServerApp : IServerNetworkApp
     public void DisconnectPeer(int peerId)
     {
         _serverNetworkService.DisconnectPeer(peerId);
+    }
+    
+    public void Dispose()
+    {
+        _serverNetworkService.Stop();
+        EventBus.Unsubscribe<ConnectionRequestEvent>(ProcessConnectionRequest);
     }
 }

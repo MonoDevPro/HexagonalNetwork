@@ -1,16 +1,16 @@
+using Network.Core.Application.Options;
 using Network.Core.Application.Ports.Outbound;
 
 namespace Network.Core.Application.Ports.Inbound;
 
 public interface IServerNetworkApp
 {
-    INetworkConfiguration Configuration { get; }
+    NetworkOptions Options { get; }
     IConnectionManager ConnectionManager { get; }
     IPacketSender PacketSender { get; }
     IPacketRegistry PacketRegistry { get; }
     INetworkEventBus EventBus { get; }
-    void Initialize();
-    bool Start(int port);
+    bool Start();
     void Stop();
     void DisconnectPeer(int peerId);
     void Update();

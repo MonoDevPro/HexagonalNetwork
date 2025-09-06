@@ -8,22 +8,16 @@ namespace Network.Adapters.LiteNet;
 /// <summary>
 /// Adaptador para gerenciamento de conexões do LiteNetLib
 /// </summary>
-public class LiteNetLibConnectionManagerAdapter : IConnectionManager
+public class LiteNetLibConnectionManagerAdapter(ILogger<LiteNetLibConnectionManagerAdapter> logger) : IConnectionManager
 {
     private readonly Dictionary<int, NetPeer> _peers = new();
-    private readonly ILogger<LiteNetLibConnectionManagerAdapter> _logger;
-        
+
     public event Action<ConnectionLatencyEvent>? ConnectionLatencyEvent;
     public void OnConnectionLatencyEvent(NetPeer peer, int latency)
     {
         ConnectionLatencyEvent?.Invoke(new ConnectionLatencyEvent(peer.Id, latency));
     }
-        
-    public LiteNetLibConnectionManagerAdapter(ILogger<LiteNetLibConnectionManagerAdapter> logger)
-    {
-        _logger = logger;
-    }
-        
+
     /// <summary>
     /// Registra um novo peer
     /// </summary>
@@ -32,7 +26,7 @@ public class LiteNetLibConnectionManagerAdapter : IConnectionManager
     public void RegisterPeer(int peerId, NetPeer peer)
     {
         _peers[peerId] = peer;
-        _logger.LogDebug("Peer registrado: {PeerId}", peerId);
+        logger.LogDebug("Peer registrado: {PeerId}", peerId);
     }
         
     /// <summary>
@@ -43,7 +37,7 @@ public class LiteNetLibConnectionManagerAdapter : IConnectionManager
     {
         if (_peers.Remove(peerId))
         {
-            _logger.LogDebug("Peer removido: {PeerId}", peerId);
+            logger.LogDebug("Peer removido: {PeerId}", peerId);
         }
     }
         
@@ -59,7 +53,7 @@ public class LiteNetLibConnectionManagerAdapter : IConnectionManager
             return peer;
         }
             
-        _logger.LogWarning("Tentativa de obter peer inexistente: {PeerId}", peerId);
+        logger.LogWarning("Tentativa de obter peer inexistente: {PeerId}", peerId);
         return null;
     }
         
@@ -88,7 +82,7 @@ public class LiteNetLibConnectionManagerAdapter : IConnectionManager
         }
         else
         {
-            _logger.LogWarning("Tentativa de verificar conexão de peer inexistente: {PeerId}", peerId);
+            logger.LogWarning("Tentativa de verificar conexão de peer inexistente: {PeerId}", peerId);
             return false;
         }
     }
